@@ -1,5 +1,5 @@
 /**
- * Ask Jack: a tiny streaming proxy in front of Claude.
+ * Ask Jack: a tiny streaming proxy in front of Gemini (free tier).
  *
  * - Answers only from the facts in src/content/jack.ts (bundled in at build time).
  * - Streams tokens to the browser as Server-Sent Events.
@@ -7,8 +7,8 @@
  * - No dependencies: Node's http + fetch.
  *
  * Env:
- *   ANTHROPIC_API_KEY  required (set it in Railway; never commit it)
- *   ASK_MODEL          default "claude-haiku-5-5"
+ *   GEMINI_API_KEY     required (Google AI Studio key; set it in Railway, never commit it)
+ *   ASK_MODEL          default "gemini-3.5-flash-lite"
  *   DAILY_CAP          max answers per day across all visitors (default 800)
  *   ALLOWED_ORIGINS    extra comma-separated origins for CORS
  *   ASK_MOCK=1         stream a canned answer without calling the API (local testing)
@@ -18,9 +18,9 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { jack, jobs, story, ai } from '../src/content/jack';
 
 const PORT = Number(process.env.PORT ?? 8787);
-const MODEL = process.env.ASK_MODEL ?? 'claude-haiku-5-5';
-const KEY = process.env.ANTHROPIC_API_KEY ?? '';
-const BASE = process.env.ANTHROPIC_BASE_URL ?? 'https://api.anthropic.com';
+const MODEL = process.env.ASK_MODEL ?? 'gemini-3.5-flash-lite';
+const KEY = process.env.GEMINI_API_KEY ?? '';
+const BASE = process.env.GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com';
 const MOCK = process.env.ASK_MOCK === '1';
 const DAILY_CAP = Number(process.env.DAILY_CAP ?? 800);
 const ORIGINS = new Set(['https://jackshomer.io', 'https://www.jackshomer.io', 'http://localhost:5173', 'http://localhost:4173', ...(process.env.ALLOWED_ORIGINS ?? '').split(',').map((s) => s.trim()).filter(Boolean)]);
@@ -136,14 +136,18 @@ async function ask(req: IncomingMessage, res: ServerResponse) {
 
   try {
     if (MOCK) {
-      const text = `**Mock mode.** ${jack.name} is the ${jack.role} at ${jack.company}. (Set ANTHROPIC_API_KEY to get real answers.)`;
+      const text = `**Mock mode.** ${jack.name} is the ${jack.role} at ${jack.company}. (Set GEMINI_API_KEY to get real answers.)`;
       for (const w of text.match(/\S+\s*/g) ?? []) { sse(res, { t: w }); await new Promise((r) => setTimeout(r, 25)); }
     } else {
-      const up = await fetch(`${BASE}/v1/messages`, {
+      const up = await fetch(`${BASE}/v1beta/models/${encodeURIComponent(MODEL)}:streamGenerateContent?alt=sse`, {
         method: 'POST',
         signal: abort.signal,
-        headers: { 'x-api-key': KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-        body: JSON.stringify({ model: MODEL, max_tokens: 450, temperature: 0.3, stream: true, system: SYSTEM, messages }),
+        headers: { 'x-goog-api-key': KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM }] },
+          contents: messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
+          generationConfig: { maxOutputTokens: 450, temperature: 0.3 },
+        }),
       });
       if (!up.ok || !up.body) { sse(res, { error: 'upstream', status: up.status }); return; }
       const reader = up.body.getReader();
@@ -154,14 +158,17 @@ async function ask(req: IncomingMessage, res: ServerResponse) {
         if (done) break;
         buf += dec.decode(value, { stream: true });
         let i: number;
+        buf = buf.replace(/\r\n/g, '\n');
         while ((i = buf.indexOf('\n\n')) >= 0) {
-          const block = buf.slice(0, i); buf = buf.slice(i + 2);
+          const block = buf.slice(0, i).replace(/\r/g, ''); buf = buf.slice(i + 2);
           const line = block.split('\n').find((l) => l.startsWith('data: '));
           if (!line) continue;
           try {
             const ev = JSON.parse(line.slice(6));
-            if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') sse(res, { t: ev.delta.text });
-            else if (ev.type === 'error') sse(res, { error: 'upstream' });
+            const parts = ev.candidates?.[0]?.content?.parts as { text?: string; thought?: boolean }[] | undefined;
+            const t = (parts ?? []).filter((p) => !p.thought).map((p) => p.text ?? '').join('');
+            if (t) sse(res, { t });
+            if (ev.error) sse(res, { error: 'upstream' });
           } catch { /* partial or non-JSON line */ }
         }
       }
@@ -182,4 +189,4 @@ createServer((req, res) => {
   if (req.method === 'GET' && (path === '/health' || path === '/')) return json(res, 200, { ok: true, model: MODEL, configured: Boolean(KEY) || MOCK });
   if (req.method === 'POST' && (path === '/ask' || path === '/api/ask')) return void ask(req, res);
   json(res, 404, { error: 'not_found' });
-}).listen(PORT, () => console.log(`ask: listening on :${PORT} (${MOCK ? 'mock' : KEY ? MODEL : 'NOT CONFIGURED: set ANTHROPIC_API_KEY'})`));
+}).listen(PORT, () => console.log(`ask: listening on :${PORT} (${MOCK ? 'mock' : KEY ? MODEL : 'NOT CONFIGURED: set GEMINI_API_KEY'})`));

@@ -91,7 +91,7 @@ const mount: Mount = (root) => {
     <div class="composer"><form>
       <label class="visually-hidden" for="ask-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Ask a question about ${jack.first}</label>
       <textarea id="ask-q" rows="1" placeholder="Ask about ${jack.first}…" enterkeyhint="send" autocomplete="off"></textarea>
-      <div class="row"><small>Answers only about ${jack.name}, powered by Claude.</small><button class="send" type="submit" aria-label="Send" disabled>${SEND}</button></div>
+      <div class="row"><small>Answers only about ${jack.name}, powered by Gemini.</small><button class="send" type="submit" aria-label="Send" disabled>${SEND}</button></div>
     </form></div>`;
 
   const scroller = root.querySelector<HTMLDivElement>('.scroll')!;
@@ -103,7 +103,7 @@ const mount: Mount = (root) => {
   const history: Msg[] = [];
   const modeEl = root.querySelector<HTMLElement>('.row small')!;
   const setMode = (m: 'ai' | 'offline') => {
-    modeEl.innerHTML = m === 'ai' ? `<span class="dot ai"></span>Answers by Claude, from ${jack.first}'s own facts.` : `<span class="dot"></span>Offline answers, only about ${jack.name}.`;
+    modeEl.innerHTML = m === 'ai' ? `<span class="dot ai"></span>Answers by Gemini, from ${jack.first}'s own facts.` : `<span class="dot"></span>Offline answers, only about ${jack.name}.`;
   };
 
   const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(200, ta.scrollHeight) + 'px'; send.disabled = !streaming && !ta.value.trim(); };

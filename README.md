@@ -9,7 +9,7 @@ Six versions of one portfolio, each one physical in a different way. Switch betw
 | `/machine` | Machine | Hardware instrument: detented dial, mechanical keys, a cartridge shelf of projects. |
 | `/gel` | Gel | Pressure soft bodies with a refraction shader. Throw and squash them. |
 | `/cabin` | Cabin | three.js log cabin: fire, rain, a bookcase of projects, and an old man who'd rather you left. |
-| `/ask` | Ask | An assistant that only answers questions about Jack (Claude via `server/ask.ts`, offline fallback built in). |
+| `/ask` | Ask | An assistant that only answers questions about Jack (Gemini via `server/ask.ts`, offline fallback built in). |
 
 Pages: `/story`, `/resume` (fast facts + PDF), `/built` (live numbers on how the site is built). Anything else gets the 404 tag.
 
@@ -26,7 +26,7 @@ npm run preview  # serve the production build
 ### The Ask server
 
 ```bash
-cp .env.example .env    # then put your ANTHROPIC_API_KEY in .env (never commit it)
+cp .env.example .env    # then put your GEMINI_API_KEY (free, from aistudio.google.com) in .env (never commit it)
 npm run ask             # builds server/ask.ts and serves it on :8787
 ```
 
@@ -36,7 +36,7 @@ On Railway, the Ask server is its own service from this repo:
 
 - Build command: `npm ci && npm run build:ask`
 - Start command: `npm run start:ask`
-- Variables: `ANTHROPIC_API_KEY` (required), optional `ASK_MODEL`, `DAILY_CAP`
+- Variables: `GEMINI_API_KEY` (required), optional `ASK_MODEL`, `DAILY_CAP`
 - Then on the **web** service set `VITE_ASK_URL=https://<ask-service-domain>/ask` and redeploy.
 
 Limits: 15 questions per 10 minutes and 60 per day per visitor, plus a daily global cap. Message content is never logged.

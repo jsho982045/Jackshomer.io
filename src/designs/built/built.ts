@@ -47,7 +47,7 @@ const TECH: [string, string][] = [
   ['Machine', 'Detented rotary dial (angle snapping with a spring), spring-damped VU needle, and recorded switch and key sounds through the Web Audio API.'],
   ['Gel', 'Position-based soft bodies (edge, bend and area constraints) rendered in WebGL with a refraction shader, so each gummy bends the backdrop behind it.'],
   ['Cabin', 'three.js with physically based materials from CC0 photo scans, filmic tone mapping, a shader fire with a shadow-casting light, rain and lightning, adaptive resolution and depth of field when you focus on something.'],
-  ['Ask', 'Streams answers from Claude through a small Node service on Railway with a facts-only system prompt, per-visitor and daily rate limits, and an automatic fallback to an offline engine.'],
+  ['Ask', 'Streams answers from Gemini (free tier) through a small Node service on Railway with a facts-only system prompt, per-visitor and daily rate limits, and an automatic fallback to an offline engine.'],
   ['Everywhere', 'Physics never runs while the tab is hidden; simulations use a fixed timestep so 60, 90 and 120 Hz screens behave the same; sounds are CC0 recordings, loaded on first interaction.'],
 ];
 
