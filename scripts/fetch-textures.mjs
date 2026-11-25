@@ -13,6 +13,9 @@ const SETS = {
   rustic_stone_wall: ['diff', 'nor', 'rough'],   // cabin fireplace
   rough_linen: ['diff', 'nor'],                  // linen banner
   american_walnut_veneer: ['diff'],              // desk surface
+  brown_leather: ['diff', 'nor', 'rough'],       // cabin recliner
+  caban: ['diff', 'nor'],                        // cabin throw blanket (wool)
+  bark_brown_02: ['diff', 'nor'],                // cabin firewood
 };
 const KEY = { diff: 'Diffuse', nor: 'nor_gl', rough: 'Rough' };
 const QUALITY = { diff: 80, nor: 90, rough: 70 };

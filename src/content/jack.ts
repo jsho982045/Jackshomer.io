@@ -79,6 +79,27 @@ export const jobs: Job[] = [
   },
 ];
 
+/** Résumé bullets (from the 2026-11-02 résumé, lightly edited). Keyed by company. */
+export const resumeBullets: Record<string, string[]> = {
+  UrbanLogic: [
+    'Recruited as the founding engineer; lead a team of four engineers through standups, code review, PR approvals and Jira planning.',
+    'Own production features end to end: technical specs, schema design, full-stack implementation, automated tests and deployment.',
+    'Work directly with the founders to turn business goals into technical requirements, architecture and roadmaps.',
+    'Build and scale a live platform serving thousands of users with PHP/Laravel REST APIs and React, on Heroku, AWS (S3, Lambda), Google Cloud and PostgreSQL.',
+    'Set up multi-tier staging environments and automated and manual testing for zero-downtime releases.',
+    'Use AI-assisted tooling (Cursor, Claude Code, Gemini) daily for scoping, test generation, debugging, refactoring and review.',
+  ],
+  HCleanz: ['Sole engineer on an “Uber for house cleaners”: built the full-stack booking platform MVP in two weeks with Next.js, Node.js, Express and MongoDB, alongside a full-time role.'],
+  'Nap York': [
+    'Started as an intern; became lead frontend engineer and sole engineer on three core frontend apps.',
+    'Rebuilt the main booking engine, replacing an external four-person team, and launched an AWS/MEWS-integrated self-check-in app.',
+    'Turned 10,000+ lines of legacy email code into modular MJML templates and added Jest unit and integration coverage.',
+  ],
+  'Atidaynu Our Future School': ['Taught coding and computer skills to students with autism using adaptive, hands-on methods.'],
+  AppliedABC: ['Aligned technical goals with business strategy alongside leadership; delivered software for a large school network and improved CI/CD.'],
+  'Adjmi Apparel': ['Analyzed sales and operations data for a $500M+ global wholesale apparel company; insights saved about $1M in costs.'],
+};
+
 export const ai = {
   /** the proof: Jack's group-chat message, four days after ChatGPT launched */
   proofImage: '/story/chatgpt-2022-12-04.webp',
@@ -221,5 +242,13 @@ export const jack = {
   ],
   allProjectsUrl: 'https://concretejungle.app/projects',
 };
+
+/** Every project as one list (for shelves): big ones first, then this site, then the early ones. */
+const SHORT: Record<string, string> = { 'Shomer Valley Railway': 'Shomer Valley', 'Casio-style virtual piano': 'Piano', 'Pac-Man from scratch': 'Pac-Man', 'Checkers with an AI opponent': 'Checkers', 'Hacker News, vintage newspaper edition': 'HN Gazette', 'AI image generator': 'AI Images', 'Wordle clone': 'Wordle' };
+export const shelf: { name: string; label: string; blurb: string; url: string; size: 'big' | 'small' }[] = [
+  ...jack.projects.map((p) => ({ ...p, label: SHORT[p.name] ?? p.name, size: 'big' as const })),
+  { name: 'jackshomer.io', label: 'This site', blurb: 'This site: six physical designs, real physics, an AI assistant. See /built for how.', url: '/built', size: 'big' },
+  ...jack.smallProjects.map((p) => ({ name: p.name, label: SHORT[p.name] ?? p.name, blurb: 'One of the early projects from the Concrete Jungle cabinet.', url: p.url, size: 'small' as const })),
+];
 
 export type Jack = typeof jack;

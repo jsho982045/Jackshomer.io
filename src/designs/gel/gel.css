@@ -16,3 +16,5 @@
 .d-gel .sheet p { margin: 0 0 14px; }
 .d-gel .sheet ul { margin: 0 0 16px; padding-left: 20px; }
 .d-gel .sheet a { color: inherit; }
+.d-gel canvas.gl { pointer-events: none; opacity: 0; transition: opacity .3s; }
+.d-gel.webgl canvas.gl { opacity: 1; }

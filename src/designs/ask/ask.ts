@@ -34,6 +34,53 @@ function md(src: string) {
     .join('');
 }
 
+// The AI endpoint. In production set VITE_ASK_URL to the Ask service's URL; in dev, Vite proxies /api.
+const API = ((import.meta.env.VITE_ASK_URL as string | undefined) || '/api/ask').replace(/\/$/, '');
+type Msg = { role: 'user' | 'assistant'; content: string };
+let remoteDown = false; // once it fails (not configured / unreachable), stay offline for this visit
+
+/** Stream an answer from the AI service. Resolves false if it couldn't, so the caller can fall back. */
+async function remote(messages: Msg[], onText: (t: string) => void, signal: AbortSignal): Promise<boolean> {
+  if (remoteDown) return false;
+  let got = 0;
+  try {
+    const firstByte = new AbortController();
+    const t = setTimeout(() => firstByte.abort(), 8000);
+    signal.addEventListener('abort', () => firstByte.abort());
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages }), signal: firstByte.signal });
+    clearTimeout(t);
+    if (!r.ok || !(r.headers.get('content-type') ?? '').includes('text/event-stream') || !r.body) {
+      if (r.status !== 429) remoteDown = true;
+      return false;
+    }
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i: number;
+      while ((i = buf.indexOf('\n\n')) >= 0) {
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        if (data === '[DONE]') return got > 0;
+        try {
+          const ev = JSON.parse(data) as { t?: string; error?: string };
+          if (ev.t) { got++; onText(ev.t); }
+          else if (ev.error) return got > 0;
+        } catch { /* ignore */ }
+      }
+    }
+    return got > 0;
+  } catch {
+    if (signal.aborted) return got > 0;
+    remoteDown = true;
+    return false;
+  }
+}
+
 const mount: Mount = (root) => {
   root.className = 'design d-ask';
   root.innerHTML = `
@@ -44,7 +91,7 @@ const mount: Mount = (root) => {
     <div class="composer"><form>
       <label class="visually-hidden" for="ask-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Ask a question about ${jack.first}</label>
       <textarea id="ask-q" rows="1" placeholder="Ask about ${jack.first}…" enterkeyhint="send" autocomplete="off"></textarea>
-      <div class="row"><small>Answers only about ${jack.name}.</small><button class="send" type="submit" aria-label="Send" disabled>${SEND}</button></div>
+      <div class="row"><small>Answers only about ${jack.name}, powered by Claude.</small><button class="send" type="submit" aria-label="Send" disabled>${SEND}</button></div>
     </form></div>`;
 
   const scroller = root.querySelector<HTMLDivElement>('.scroll')!;
@@ -53,6 +100,11 @@ const mount: Mount = (root) => {
   const ta = root.querySelector('textarea')!;
   const send = root.querySelector<HTMLButtonElement>('.send')!;
   let streaming: { cancel: () => void } | null = null;
+  const history: Msg[] = [];
+  const modeEl = root.querySelector<HTMLElement>('.row small')!;
+  const setMode = (m: 'ai' | 'offline') => {
+    modeEl.innerHTML = m === 'ai' ? `<span class="dot ai"></span>Answers by Claude, from ${jack.first}'s own facts.` : `<span class="dot"></span>Offline answers, only about ${jack.name}.`;
+  };
 
   const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(200, ta.scrollHeight) + 'px'; send.disabled = !streaming && !ta.value.trim(); };
   const atBottom = () => scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 80;
@@ -82,21 +134,42 @@ const mount: Mount = (root) => {
     if (matchMedia('(pointer: fine)').matches) ta.focus({ preventScroll: true });
     toBottom();
 
-    const full = answer(q);
     const txt = b.querySelector<HTMLDivElement>('.txt')!;
-    const tokens = full.match(/\S+\s*|\n+/g) ?? [full];
-    let i = 0, timer = 0;
-    const finish = () => { clearTimeout(timer); txt.innerHTML = md(tokens.slice(0, Math.max(i, 1)).join('')); b.classList.remove('streaming'); b.dataset.raw = full; setStreaming(null); };
-    const tick = () => {
-      const stick = atBottom();
-      i = Math.min(tokens.length, i + 1 + (Math.random() < 0.3 ? 1 : 0));
-      txt.innerHTML = md(tokens.slice(0, i).join(''));
-      if (stick) toBottom();
-      if (i >= tokens.length) return finish();
-      timer = window.setTimeout(tick, 18 + Math.random() * 34);
+    history.push({ role: 'user', content: q });
+    let full = '';
+    let raf = 0;
+    const paint = () => { raf = 0; const stick = atBottom(); txt.innerHTML = md(full); if (stick) toBottom(); };
+    const finish = () => {
+      clearTimeout(timer);
+      if (raf) cancelAnimationFrame(raf);
+      txt.innerHTML = md(full || '…');
+      b.classList.remove('streaming');
+      b.dataset.raw = full;
+      history.push({ role: 'assistant', content: full });
+      setStreaming(null);
     };
-    setStreaming({ cancel: () => { i = Math.max(i, 1); finish(); } });
-    timer = window.setTimeout(tick, 380 + Math.random() * 260); // a beat of "thinking"
+    // offline engine: reveal a precomputed answer word by word
+    let timer = 0;
+    const local = () => {
+      const tokens = answer(q).match(/\S+\s*|\n+/g) ?? [];
+      let i = 0;
+      const tick = () => {
+        i = Math.min(tokens.length, i + 1 + (Math.random() < 0.3 ? 1 : 0));
+        full = tokens.slice(0, i).join('');
+        paint();
+        if (i >= tokens.length) return finish();
+        timer = window.setTimeout(tick, 18 + Math.random() * 34);
+      };
+      timer = window.setTimeout(tick, 300 + Math.random() * 200);
+    };
+    const ctrl = new AbortController();
+    setStreaming({ cancel: () => { ctrl.abort(); finish(); } });
+    void remote(history.slice(-12), (t) => { full += t; if (!raf) raf = requestAnimationFrame(paint); }, ctrl.signal).then((ok) => {
+      setMode(ok ? 'ai' : 'offline');
+      if (ctrl.signal.aborted) return;
+      if (ok && full) finish();
+      else { full = ''; local(); }
+    });
   }
 
   form.addEventListener('submit', (e) => { e.preventDefault(); ask(ta.value); });

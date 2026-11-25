@@ -7,10 +7,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "textures": "node scripts/fetch-textures.mjs"
+    "textures": "node scripts/fetch-textures.mjs",
+    "build:ask": "esbuild server/ask.ts --bundle --platform=node --format=esm --target=node20 --outfile=server/dist/ask.mjs",
+    "ask": "npm run build:ask && node --env-file-if-exists=.env server/dist/ask.mjs",
+    "start:ask": "node server/dist/ask.mjs"
   },
   "devDependencies": {
     "@types/three": "^0.170.0",
+    "esbuild": "^0.25.12",
     "sharp": "^0.35.5",
     "typescript": "^5.9.3",
     "vite": "^6.4.6"

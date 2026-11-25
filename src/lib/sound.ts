@@ -73,3 +73,54 @@ export function swish(dur = 0.18, freq = 3200, gain = 0.12) {
 export function audioCtx() {
   return ctx();
 }
+
+/* ---------- recorded samples (Kenney "Interface Sounds", CC0) ---------- */
+// Files live in /public/sounds. Each one is fetched + decoded once, on first use.
+const buffers = new Map<string, AudioBuffer | Promise<AudioBuffer | null> | null>();
+
+function load(name: string) {
+  const a = ctx();
+  if (!a) return null;
+  let b = buffers.get(name);
+  if (b === undefined) {
+    const p = fetch(`/sounds/${name}.mp3`)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
+      .then((ab) => a.decodeAudioData(ab))
+      .then((buf) => (buffers.set(name, buf), buf))
+      .catch(() => (buffers.set(name, null), null));
+    buffers.set(name, p);
+    b = p;
+  }
+  return b instanceof AudioBuffer ? b : null;
+}
+
+/** Warm the cache so the first real interaction plays instantly. */
+export function preload(names: string[]) {
+  const go = () => names.forEach(load);
+  if (armed) go();
+  else addEventListener('pointerdown', go, { capture: true, once: true });
+}
+
+/**
+ * Play a recorded sample (a random pick if given several), with a little pitch
+ * variation so repeats don't sound mechanical. Falls back to `fallback` while the
+ * sample is still loading or if it failed.
+ */
+export function sample(names: string | string[], opts: { gain?: number; rate?: number; jitter?: number; pan?: number } = {}, fallback?: () => void) {
+  const a = ctx();
+  if (!a) return;
+  const list = Array.isArray(names) ? names : [names];
+  const name = list[(Math.random() * list.length) | 0];
+  const buf = load(name);
+  if (!buf) { fallback?.(); return; }
+  const src = a.createBufferSource();
+  src.buffer = buf;
+  const j = opts.jitter ?? 0.06;
+  src.playbackRate.value = (opts.rate ?? 1) * (1 + (Math.random() * 2 - 1) * j);
+  const g = a.createGain();
+  g.gain.value = opts.gain ?? 0.6;
+  let node: AudioNode = src.connect(g);
+  if (opts.pan) { const p = a.createStereoPanner(); p.pan.value = opts.pan; node = node.connect(p); }
+  node.connect(a.destination);
+  src.start();
+}

@@ -33,6 +33,10 @@ export const designs: DesignMeta[] = [
 /** Pages that aren't designs: reachable from every design, but not in the [ ] rotation. */
 export const pages: DesignMeta[] = [
   { id: 'story', path: '/story', name: 'My story', tone: 'light', blurb: 'The long way in: data analyst to founding engineer.', load: memo(() => import('./story/story')) },
+  { id: 'resume', path: '/resume', name: 'Résumé', tone: 'light', blurb: 'Fast facts, the full résumé, and a PDF.', load: memo(() => import('./resume/resume')) },
+  { id: 'built', path: '/built', name: 'How it’s built', tone: 'dark', blurb: 'Real numbers and techniques behind this site.', load: memo(() => import('./built/built')) },
 ];
+
+export const notFound: DesignMeta = { id: 'notfound', path: '', name: 'Not found', tone: 'dark', blurb: '', load: memo(() => import('./notfound/notfound')) };
 
 export const byPath = (p: string) => designs.find((d) => d.path === p) ?? pages.find((d) => d.path === p);

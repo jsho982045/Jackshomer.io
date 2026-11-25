@@ -49,3 +49,5 @@
 .d-ask .send svg { width: 18px; height: 18px; }
 .d-ask :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .d-ask textarea:focus-visible { outline: none; }
+.d-ask .row small .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--soft); margin-right: 7px; vertical-align: 1px; }
+.d-ask .row small .dot.ai { background: #3fa46a; box-shadow: 0 0 0 3px rgba(63,164,106,.18); }

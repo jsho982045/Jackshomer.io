@@ -2,11 +2,34 @@
 <html lang="en" data-tone="dark">
   <head>
     <meta charset="utf-8" />
+    <script>
+      // www.jackshomer.io → jackshomer.io, before anything else loads
+      if (location.hostname === 'www.jackshomer.io') location.replace('https://jackshomer.io' + location.pathname + location.search + location.hash);
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Jack Shomer</title>
-    <meta name="description" content="Jack Shomer, software engineer in Brooklyn. A portfolio you can touch." />
+    <title>Jack Shomer · Software Engineer</title>
+    <meta name="description" content="Jack Shomer, founding engineer in Brooklyn. A portfolio you can touch: six physical designs, real physics, and the long way in." />
+    <link rel="canonical" href="https://jackshomer.io/" />
     <meta name="theme-color" content="#1b1c1e" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- link previews (Slack, LinkedIn, iMessage, X, application portals) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Jack Shomer" />
+    <meta property="og:url" content="https://jackshomer.io/" />
+    <meta property="og:title" content="Jack Shomer · A portfolio you can touch" />
+    <meta property="og:description" content="Founding engineer in Brooklyn. Pull the cloth, flip the paper, turn the dial: six physical designs, one story." />
+    <meta property="og:image" content="https://jackshomer.io/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Jack Shomer, software engineer: polaroids of a cross-stitched linen banner, gummy sweets, a log cabin and a hardware machine" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jack Shomer · A portfolio you can touch" />
+    <meta name="twitter:description" content="Founding engineer in Brooklyn. Six physical designs, real physics, one story." />
+    <meta name="twitter:image" content="https://jackshomer.io/og.jpg" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"Person","name":"Jack Shomer","jobTitle":"Founding Engineer","url":"https://jackshomer.io","email":"mailto:jackshomer98@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Brooklyn","addressRegion":"NY"},"alumniOf":"Brooklyn College","sameAs":["https://github.com/jsho982045","https://www.linkedin.com/in/jack-shomer-067123266/"]}
+    </script>
     <style>
       /* paint the right background before any CSS arrives */
       html { background: #1b1c1e; }
@@ -14,7 +37,7 @@
   </head>
   <body>
     <main id="stage"></main>
-    <noscript><p style="padding:24px;color:#eee">Jack Shomer, software engineer in Brooklyn. This site needs JavaScript for its physics.</p></noscript>
+    <noscript><p style="padding:24px;color:#eee">Jack Shomer, software engineer in Brooklyn. This site needs JavaScript for its physics. Email: jackshomer98@gmail.com</p></noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

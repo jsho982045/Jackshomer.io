@@ -4,8 +4,13 @@ import '@fontsource/caveat/500.css';
 import '@fontsource/caveat/700.css';
 import './cabin.css';
 import { logTexture, plankTexture, stoneTexture, rugTexture, forestTexture, pageTexture, labelTexture } from './textures';
-import { audioCtx, click } from '../../lib/sound';
-import { jack, jobs } from '../../content/jack';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { audioCtx, click, sample, preload } from '../../lib/sound';
+import { jack, jobs, shelf } from '../../content/jack';
+import { addCozy } from './cozy';
 import type { Mount } from '../registry';
 
 /**
@@ -64,9 +69,10 @@ const mount: Mount = (root) => {
     <canvas aria-label="A log cabin at dusk with a fire burning, rain on the window, and a table of objects about Jack"></canvas>
     <div class="lens"></div>
     <div class="labels"></div>
+    <div class="say" aria-live="polite"></div>
     <div class="panel" role="dialog" aria-modal="false"><div class="pb"></div><button data-a="back">Back to the room</button></div>
     <div class="loading">Lighting the fire…</div>
-    <div class="bar"><p><b>Cabin.</b> Look around with your mouse (or drag). Everything glowing on the table is about me; click it.</p><button data-a="sound" aria-pressed="false">Sound off</button></div>`;
+    <div class="bar"><p><b>Cabin.</b> Look around with your mouse (or drag). Everything glowing is about me; click it. Try not to bother the old man.</p><button data-a="sound" aria-pressed="false">Sound off</button></div>`;
   const cv = root.querySelector('canvas')!;
   const labels = root.querySelector<HTMLDivElement>('.labels')!;
   const panel = root.querySelector<HTMLDivElement>('.panel')!;
@@ -312,8 +318,17 @@ const mount: Mount = (root) => {
     const diploma = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.38, 0.03), [frameMat, frameMat, frameMat, frameMat, new THREE.MeshStandardMaterial({ map: diplomaTex, roughness: 0.6 }), frameMat]);
     diploma.position.set(-0.8, 1.72, -2.84); scene.add(diploma);
 
+    // ---------- the lived-in bits: recliner, old man, bookcase, lamp, tea ----------
+    const cozy = addCozy(scene, { coarse, scanned, FZ });
+    const say = root.querySelector<HTMLDivElement>('.say')!;
+    let sayT = 0;
+    cozy.onSay((line) => {
+      say.textContent = line; say.classList.add('on'); sayT = 3.4;
+      grumbleSound();
+    });
+
     // ---------- lights ----------
-    scene.add(new THREE.HemisphereLight('#4a5a7a', '#20160f', 0.55));
+    scene.add(new THREE.HemisphereLight('#4a5a7a', '#24180f', 0.45));
     const fire = new THREE.PointLight('#ff8f4a', 8, 0, 2);
     fire.position.set(-2.3, 0.55, FZ); fire.castShadow = !coarse;
     fire.shadow.mapSize.set(512, 512); fire.shadow.bias = -0.003; fire.shadow.radius = 6; fire.shadow.camera.near = 0.1;
@@ -322,7 +337,7 @@ const mount: Mount = (root) => {
     lamp.position.set(-0.45, TY + 0.14, -1.05); scene.add(lamp);
     const moon = new THREE.DirectionalLight('#9fb4d6', 0.9);
     moon.position.set(wx, 2.4, -6); moon.target.position.set(0, 0, 0); scene.add(moon, moon.target);
-    const fill = new THREE.PointLight('#ffd2a8', 0.9, 0, 2);
+    const fill = new THREE.PointLight('#ffcf9e', 0.75, 0, 2);
     fill.position.set(0.3, 1.6, 0.6); scene.add(fill);
 
     // ---------- hotspots ----------
@@ -331,7 +346,7 @@ const mount: Mount = (root) => {
     const hots: Hot[] = [
       { id: 'about', label: 'About', obj: notebook, anchor: v(0.05, TY + 0.06, -0.62), view: [v(0.1, TY + 0.62, -0.1), v(0.05, TY, -0.66)], html: `<h2>${jack.name}</h2><p>${jack.headline}</p><p>${jack.role} at ${jack.company}. I got here the long way: data analyst, coding teacher, intern, lead frontend.</p><p><a href="/story">Read my story →</a></p>` },
       { id: 'work', label: 'Work', obj: photo, anchor: v(0.72, TY + 0.33, -1.12), view: [v(0.5, TY + 0.25, -0.45), v(0.72, TY + 0.15, -1.12)], html: `<h2>${jack.company}</h2><p>${jack.role} (${jack.title}) since ${jack.since}. First hire at ${jack.companyAbout}; I now lead ${jack.team}.</p><p>Before that:</p><ul>${jobs.slice(1).filter((j) => !j.minor).map((j) => `<li><b>${j.company}</b>, ${j.title} (${j.when})</li>`).join('')}</ul>` },
-      { id: 'projects', label: 'Projects', obj: books, anchor: v(0.88, TY + 0.2, -0.62), view: [v(0.62, TY + 0.38, -0.05), v(0.88, TY + 0.06, -0.62)], html: `<h2>Side projects</h2><ul>${jack.projects.map((p) => `<li><b>${p.name}.</b> ${p.blurb}</li>`).join('')}</ul>` },
+      { id: 'projects', label: 'Projects', obj: cozy.bookcase, anchor: cozy.bookAnchor, view: [v(1.75, 1.2, -1.2), v(3.1, 1.0, -2.45)], html: `<h2>The project shelf</h2><ul class="shelf">${shelf.map((p) => `<li><a href="${p.url}"${p.url.startsWith('/') ? '' : ' target="_blank" rel="noopener"'}><b>${p.name}</b></a> ${p.blurb}</li>`).join('')}</ul><p><a href="${jack.allProjectsUrl}" target="_blank" rel="noopener">Everything on concretejungle.app ↗</a></p>` },
       { id: 'contact', label: 'Contact', obj: radio, anchor: v(0.15, TY + 0.25, -1.15), view: [v(0.15, TY + 0.3, -0.55), v(0.15, TY + 0.1, -1.15)], html: `<h2>Get in touch</h2><ul>${contact}</ul>` },
       { id: 'school', label: 'School', obj: diploma, anchor: v(-0.8, 1.98, -2.84), view: [v(-0.6, 1.7, -1.9), v(-0.8, 1.72, -2.84)], html: `<h2>${jack.school}</h2><p>${jack.study}, ${jack.schoolYears}. Before that, I taught myself with free online courses during Covid.</p>` },
     ];
@@ -353,8 +368,9 @@ const mount: Mount = (root) => {
         goalPos.copy(h.view[0]); goalLook.copy(h.view[1]);
         panel.querySelector('.pb')!.innerHTML = h.html;
         panel.classList.add('on');
-        click(1400, 0.05, 0.08);
+        sample('open_001', { gain: 0.35 }, () => click(1400, 0.05, 0.08));
       } else {
+        if (panel.classList.contains('on')) sample('close_001', { gain: 0.3 });
         goalPos.copy(home[0]); goalLook.copy(home[1]);
         panel.classList.remove('on');
       }
@@ -373,9 +389,20 @@ const mount: Mount = (root) => {
       if (moved) return;
       const r = cv.getBoundingClientRect();
       ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      if (!focused && hitMan()) { cozy.poke(); return; }
       const h = pick();
       if (h) focus(h); else if (focused) focus(null);
     };
+    function hitMan() { ray.setFromCamera(ndc, camera); return ray.intersectObject(cozy.man, true).length > 0; }
+    function grumbleSound() {
+      const a = audioCtx(); if (!a || !snd) return;
+      // a low, nasal "hmph": two detuned saws through a formant-ish bandpass
+      const t0 = a.currentTime, g = a.createGain(), bp = a.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 520; bp.Q.value = 3;
+      g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.12, t0 + 0.04); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.45);
+      for (const d of [0, 7]) { const o = a.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(118 + d, t0); o.frequency.exponentialRampToValueAtTime(88 + d, t0 + 0.4); o.connect(bp); o.start(t0); o.stop(t0 + 0.5); }
+      bp.connect(g).connect(a.destination);
+    }
     function pick(): Hot | null {
       ray.setFromCamera(ndc, camera);
       const hit = ray.intersectObjects(hots.map((h) => h.obj), true)[0];
@@ -419,12 +446,24 @@ const mount: Mount = (root) => {
       const s = a.createBufferSource(); s.buffer = buf; const g = a.createGain(); g.gain.value = 0.9; s.connect(g).connect(a.destination); s.start(a.currentTime + 1.2);
     }
 
+    // ---------- depth of field when zoomed in (desktop only) ----------
+    let composer: EffectComposer | null = null, bokeh: BokehPass | null = null, dof = 0;
+    if (!coarse) {
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      bokeh = new BokehPass(scene, camera, { focus: 1, aperture: 0.004, maxblur: 0 });
+      composer.addPass(bokeh);
+      composer.addPass(new OutputPass());
+    }
+    preload(['open_001', 'close_001']);
+
     // ---------- loop ----------
     let raf = 0, t = 0, last = performance.now(), flash = 0, nextBolt = 8 + Math.random() * 10, frames = 0, slow = 0;
     const proj = new THREE.Vector3(), dir = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
     function resize() {
       const w = root.clientWidth, h = root.clientHeight;
       renderer.setSize(w, h, false);
+      composer?.setPixelRatio(dpr); composer?.setSize(w, h);
       camera.aspect = w / h;
       camera.fov = w / h < 0.8 ? 72 : w / h < 1.2 ? 62 : 55;
       camera.updateProjectionMatrix();
@@ -483,7 +522,24 @@ const mount: Mount = (root) => {
         h.el!.style.transform = `translate(${((proj.x + 1) / 2) * root.clientWidth}px, ${((1 - proj.y) / 2) * root.clientHeight}px) translate(-50%, -100%)`;
         h.el!.style.visibility = vis ? 'visible' : 'hidden';
       }
-      renderer.render(scene, camera);
+      // the old man: annoyed if you look straight at him (centre of view) or hover him
+      proj.copy(cozy.headAnchor()).project(camera);
+      const onScreen = proj.z < 1 && Math.abs(proj.x) < 1 && Math.abs(proj.y) < 1;
+      const gaze = onScreen && !focused && ((Math.abs(proj.x) < 0.28 && Math.abs(proj.y) < 0.4) || (ndc.x > -2 && Math.hypot(ndc.x - proj.x, ndc.y - proj.y) < 0.12));
+      cozy.update(dt, t, camera, gaze);
+      say.style.transform = `translate(${((proj.x + 1) / 2) * root.clientWidth}px, ${((1 - proj.y) / 2) * root.clientHeight}px) translate(-50%, -100%)`;
+      say.style.visibility = onScreen ? 'visible' : 'hidden';
+      if (sayT > 0 && (sayT -= dt) <= 0) say.classList.remove('on');
+
+      // depth of field ramps in while focused on an object
+      dof += ((focused ? 1 : 0) - dof) * (1 - Math.pow(0.02, dt));
+      if (composer && bokeh && dof > 0.02) {
+        const u = bokeh.uniforms as Record<string, { value: number }>;
+        u.focus.value = camera.position.distanceTo(camLook);
+        u.maxblur.value = 0.006 * dof;
+        u.aperture.value = 0.012;
+        composer.render(dt);
+      } else renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);
     }
     const onVis = () => { cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } };
@@ -505,6 +561,7 @@ const mount: Mount = (root) => {
         const mats = Array.isArray(m.material) ? m.material : m.material ? [m.material] : [];
         for (const mat of mats) { for (const val of Object.values(mat)) if (val instanceof THREE.Texture) val.dispose(); mat.dispose(); }
       });
+      composer?.dispose();
       renderer.dispose();
     };
   }

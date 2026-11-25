@@ -3,7 +3,7 @@ import '@fontsource/caveat/500.css';
 import '@fontsource/caveat/700.css';
 import './desk.css';
 import { loop } from '../../lib/loop';
-import { swish, click } from '../../lib/sound';
+import { swish, click, sample, preload } from '../../lib/sound';
 import { jack, jobs, ai } from '../../content/jack';
 import type { Mount } from '../registry';
 
@@ -79,7 +79,7 @@ const mount: Mount = (root) => {
   function bring(o: Obj) { o.el.style.zIndex = String(++z); }
   function act(o: Obj) {
     if (o === folder) { openFolder(); return; }
-    if (o.el.classList.contains('flip')) { o.el.classList.toggle('flipped'); swish(0.14, 2200, 0.08); }
+    if (o.el.classList.contains('flip')) { o.el.classList.toggle('flipped'); sample(['scratch_001', 'scratch_002'], { gain: 0.35, rate: 1.1 }, () => swish(0.14, 2200, 0.08)); }
   }
   function openFolder() {
     if (!sheet.el.hidden) { bring(sheet); sheet.vx = 0; return; }
@@ -87,7 +87,7 @@ const mount: Mount = (root) => {
     sheet.x = folder.x; sheet.y = folder.y; sheet.a = folder.a;
     sheet.vx = 0; sheet.vy = -26 * S; sheet.va = 0.02;
     bring(sheet);
-    swish(0.3, 2600, 0.14);
+    sample('scratch_004', { gain: 0.45, rate: 0.8 }, () => swish(0.3, 2600, 0.14));
   }
 
   const onDown = (e: PointerEvent) => {
@@ -99,7 +99,7 @@ const mount: Mount = (root) => {
     bring(o);
     grab = { o, r: rot(mx - o.x, my - o.y, -o.a), sx: mx, sy: my, t: performance.now(), id: e.pointerId };
     o.el.classList.add('lift');
-    click(900, 0.02, 0.06);
+    sample(['pluck_001', 'pluck_002'], { gain: 0.18, rate: 1.6 }, () => click(900, 0.02, 0.06));
   };
   const onMove = (e: PointerEvent) => { if (grab && e.pointerId === grab.id) { mx = e.clientX; my = e.clientY; } };
   const onUp = () => {
@@ -109,6 +109,7 @@ const mount: Mount = (root) => {
       if (lastTap.o === o && now - lastTap.t < 380) { act(o); lastTap = { t: 0, o: null }; } else lastTap = { t: now, o };
     }
     o.el.classList.remove('lift');
+    sample(['drop_001', 'drop_002', 'drop_003'], { gain: 0.25, rate: 0.9 });
     grab = null;
   };
   surface.addEventListener('pointerdown', onDown);
@@ -135,7 +136,7 @@ const mount: Mount = (root) => {
     const on = !root.classList.toggle('dim');
     lampBtn.setAttribute('aria-pressed', String(on));
     lampBtn.textContent = on ? 'Lamp on' : 'Lamp off';
-    click(700, 0.05, 0.4, 70);
+    sample('switch_002', { gain: 0.8, rate: 0.9 }, () => click(700, 0.05, 0.4, 70));
   });
 
   const stop = loop(() => {
@@ -166,6 +167,7 @@ const mount: Mount = (root) => {
     if (Math.abs(root.clientWidth - W) > 40) { place(); paintAll(); } else H = root.clientHeight;
   });
   ro.observe(root);
+  preload(['scratch_001', 'scratch_002', 'scratch_004', 'pluck_001', 'pluck_002', 'drop_001', 'drop_002', 'drop_003', 'switch_002']);
   place();
   paintAll();
   return () => { stop(); ro.disconnect(); };

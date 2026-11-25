@@ -2,8 +2,8 @@ import '@fontsource/vt323';
 import '@fontsource-variable/archivo/wdth.css';
 import './machine.css';
 import { loop } from '../../lib/loop';
-import { click, setMuted } from '../../lib/sound';
-import { jack, jobs, ai } from '../../content/jack';
+import { click, setMuted, sample, preload } from '../../lib/sound';
+import { jack, jobs, ai, shelf } from '../../content/jack';
 import type { Mount } from '../registry';
 
 /**
@@ -44,6 +44,11 @@ const mount: Mount = (root) => {
           <div class="keys">${KEYS.map((k, i) => `<button class="key${i === KEYS.length - 1 ? ' or' : ''}" data-k="${i}">${k[0]}</button>`).join('')}</div>
         </div>
       </div>
+    </div>
+    <div class="shelf" aria-label="Project cartridges">
+      <div class="slot"><span class="silk">Cartridge port</span><a class="open" hidden target="_blank" rel="noopener">Open ↗</a></div>
+      <div class="carts">${shelf.map((p, i) => `<button class="cart ${p.size}" data-i="${i}" style="--c:${['#d9481c', '#2f6db5', '#2f8a5a', '#c99a1e', '#7b4bb3', '#c2364c', '#3d8b8e', '#8a6a3a', '#4a4f57', '#b5562f'][i % 10]}"><span class="lbl">${p.label}</span></button>`).join('')}</div>
+      <div class="plank"></div>
     </div>
     <div class="bar"><p><b>Machine.</b> Turn the dial, press the keys, flip the switches. Arrow keys turn the dial; 1 to 4 press the keys. Sound on for the clicks.</p></div>`;
 
@@ -92,7 +97,7 @@ const mount: Mount = (root) => {
     knob.setAttribute('aria-valuenow', String(i));
     knob.setAttribute('aria-valuetext', SEC[i][0]);
     if (snap) { ang = DET[i]; knob.style.transform = `rotate(${ang}deg)`; }
-    if (changed) { click(2600, 0.02, 0.35); show(SEC[i][1]); }
+    if (changed) { sample(['tick_001', 'tick_002', 'tick_004'], { gain: 0.9 }, () => click(2600, 0.02, 0.35)); show(SEC[i][1]); }
   }
 
   let drag: { p: number; a: number } | null = null;
@@ -124,7 +129,7 @@ const mount: Mount = (root) => {
   knob.addEventListener('pointerup', endK);
   knob.addEventListener('pointercancel', endK);
 
-  root.querySelector('.keys')!.addEventListener('pointerdown', (e) => { if ((e.target as Element).closest('.key')) click(1500, 0.03, 0.35, 140); });
+  root.querySelector('.keys')!.addEventListener('pointerdown', (e) => { if ((e.target as Element).closest('.key')) sample(['click_001', 'click_002', 'click_003'], { gain: 0.8, rate: 0.85 }, () => click(1500, 0.03, 0.35, 140)); });
   root.querySelector('.keys')!.addEventListener('click', (e) => {
     const k = (e.target as Element).closest<HTMLButtonElement>('.key');
     if (k) show(KEYS[+k.dataset.k!][1]);
@@ -136,11 +141,24 @@ const mount: Mount = (root) => {
       b.setAttribute('aria-pressed', String(v));
       const t = b.dataset.t;
       if (t === 'snd' && v) setMuted(false);
-      click(900, 0.04, 0.5, 90);
+      sample(['switch_001', 'switch_002', 'switch_004'], { gain: 0.8 }, () => click(900, 0.04, 0.5, 90));
       if (t === 'snd' && !v) setTimeout(() => setMuted(true), 60);
       if (t === 'pow') { power = v; lcd.classList.toggle('off', !v); if (v) show(SEC[sel][1]); else { clearInterval(typer); lcd.textContent = ''; } }
       if (t === 'lit') lcd.classList.toggle('lit', v);
     });
+  });
+
+  // cartridges: pick one and it rises into the port; the LCD reads it
+  const carts = root.querySelector<HTMLDivElement>('.carts')!;
+  const openA = root.querySelector<HTMLAnchorElement>('.slot .open')!;
+  carts.addEventListener('click', (e) => {
+    const c = (e.target as Element).closest<HTMLButtonElement>('.cart');
+    if (!c) return;
+    const p = shelf[+c.dataset.i!];
+    carts.querySelectorAll('.cart').forEach((x) => x.classList.toggle('in', x === c));
+    sample(['switch_004', 'click_003'], { gain: 0.7, rate: 0.75 }, () => click(700, 0.05, 0.4, 80));
+    show(`CARTRIDGE: ${U(p.name)}\n\n${U(p.blurb)}`);
+    if (p.url) { openA.href = p.url; openA.target = p.url.startsWith('/') ? '' : '_blank'; openA.hidden = false; } else openA.hidden = true;
   });
 
   const onKey = (e: KeyboardEvent) => {
@@ -149,7 +167,7 @@ const mount: Mount = (root) => {
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); setSel(Math.max(0, sel - 1), true); }
     else if (/^[1-4]$/.test(e.key)) {
       const k = root.querySelector<HTMLButtonElement>(`.key[data-k="${+e.key - 1}"]`);
-      if (k) { k.classList.add('dn'); click(1500, 0.03, 0.35, 140); show(KEYS[+e.key - 1][1]); setTimeout(() => k.classList.remove('dn'), 110); }
+      if (k) { k.classList.add('dn'); sample(['click_001', 'click_002', 'click_003'], { gain: 0.8, rate: 0.85 }, () => click(1500, 0.03, 0.35, 140)); show(KEYS[+e.key - 1][1]); setTimeout(() => k.classList.remove('dn'), 110); }
     }
   };
   addEventListener('keydown', onKey);
@@ -177,6 +195,7 @@ const mount: Mount = (root) => {
     if (Math.abs(nv) > 0.001 || act > 0.001) ndl.setAttribute('transform', `rotate(${na} 95 130)`);
   });
 
+  preload(['switch_004', 'click_003', 'tick_001', 'tick_002', 'tick_004', 'click_001', 'click_002', 'click_003', 'switch_001', 'switch_002', 'switch_004']);
   setSel(0, true);
   return () => { stop(); clearInterval(typer); removeEventListener('keydown', onKey); setMuted(false); };
 };

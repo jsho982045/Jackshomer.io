@@ -18,7 +18,7 @@ export function mountHub(el: HTMLElement) {
           )
           .join('')}
       </div>
-      <p class="foot">Tip: <kbd>[</kbd> and <kbd>]</kbd> step between designs.</p>
+      <p class="foot"><a href="/resume">Résumé</a> · <a href="/built">How this site is built</a> · Tip: <kbd>[</kbd> and <kbd>]</kbd> step between designs.</p>
     </section>`;
   return () => {};
 }

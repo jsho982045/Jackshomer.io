@@ -1,7 +1,7 @@
 import '@fontsource-variable/fraunces';
 import './linen.css';
 import { fixed, fitCanvas } from '../../lib/loop';
-import { swish } from '../../lib/sound';
+import { swish, sample, preload } from '../../lib/sound';
 import { jack } from '../../content/jack';
 import type { Mount } from '../registry';
 
@@ -26,7 +26,8 @@ const mount: Mount = (root) => {
         <li><a href="/ask">Ask me anything</a></li>
       </ul>
     </div>
-    <canvas aria-label="A cross-stitched banner reading Jack Shomer. Drag to pull it, cut it, or tear it down to read what is behind it." role="img"></canvas>
+    <canvas class="gl" aria-hidden="true"></canvas>
+    <canvas class="c2d" aria-label="A cross-stitched banner reading Jack Shomer. Drag to pull it, cut it, or tear it down to read what is behind it." role="img"></canvas>
     <div class="bar">
       <p><b>Linen.</b> Drag to pull. Cut (or hold Shift) to slice. Tear it off its rings to read what's on the wall.</p>
       <div class="btns">
@@ -36,7 +37,8 @@ const mount: Mount = (root) => {
       </div>
     </div>`;
 
-  const cv = root.querySelector('canvas')!;
+  const cv = root.querySelector<HTMLCanvasElement>('canvas.c2d')!;
+  const glc = root.querySelector<HTMLCanvasElement>('canvas.gl')!;
   const ctx = cv.getContext('2d', { alpha: true })!;
   const behind = root.querySelector<HTMLDivElement>('.behind')!;
   const LX = -0.5, LY = -0.6, LZ = 0.65, LL = Math.hypot(LX, LY, LZ);
@@ -46,7 +48,9 @@ const mount: Mount = (root) => {
   let px = new Float32Array(0), py = px, pz = px, qx = px, qy = px, qz = px;
   let pin = new Uint8Array(0), alive = pin;
   let ca = new Int32Array(0), cb = ca, hC = ca, vC = ca;
-  let cellCol = new Uint8Array(0);
+  let cellCol = new Uint8Array(0), kind = new Uint8Array(0);
+  let topo = 0, dpr = 1;
+  let gl: ReturnType<typeof import('./gl').linenGL> | null = null;
   let iters = 5, t = 0, wind = true, mode: 'pull' | 'cut' = 'pull';
   let grab = -1, cutting = false, mx = 0, my = 0, lx0 = 0, ly0 = 0, lastTearSound = 0;
   let hoverX = -1, hoverY = -1, hoverV = 0;
@@ -62,15 +66,15 @@ const mount: Mount = (root) => {
     g.fillText('JACK', w / 2, h * 0.34);
     g.fillText('SHOMER', w / 2, h * 0.34 + fs * 1.05);
     const txt = g.getImageData(0, 0, w, h).data;
-    cellCol = new Uint8Array(w * h * 3);
+    cellCol = new Uint8Array(w * h * 3); kind = new Uint8Array(w * h);
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
       const k = j * w + i;
       let r = 226, gg = 216, b = 196;
       const inside = i >= 2 && i <= w - 3 && j >= 2 && j <= h - 3;
       const edge = inside && (i === 2 || i === w - 3 || j === 2 || j === h - 3) && (i + j) % 2 === 0;
       const band = i > 5 && i < w - 6 && ((j === h - 6 && i % 4 === 0) || ((j === h - 7 || j === h - 5) && i % 2 === 1));
-      if (txt[k * 4 + 3] > 120) { r = 176; gg = 36; b = 44; }
-      else if (edge || band) { r = 44; gg = 62; b = 140; }
+      if (txt[k * 4 + 3] > 120) { r = 176; gg = 36; b = 44; kind[k] = 1; }
+      else if (edge || band) { r = 44; gg = 62; b = 140; kind[k] = 2; }
       const v = ((i + j) % 2 ? 1.018 : 0.982) * (0.985 + Math.random() * 0.03);
       cellCol[k * 3] = Math.min(255, r * v); cellCol[k * 3 + 1] = Math.min(255, gg * v); cellCol[k * 3 + 2] = Math.min(255, b * v);
     }
@@ -102,6 +106,8 @@ const mount: Mount = (root) => {
       if (j < rows - 1) { vC[a] = c; ca[c] = a; cb[c] = a + cols; c++; }
     }
     texture();
+    topo++;
+    gl?.rebuild(state());
     behind.style.top = `${y0 + Math.min(rows * sp * 0.22, 140)}px`;
   }
 
@@ -109,7 +115,8 @@ const mount: Mount = (root) => {
   function resize() {
     const s = fitCanvas(cv, 2);
     W = s.w; H = s.h;
-    ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
+    ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0); dpr = s.dpr;
+    gl?.resize(W, H, dpr);
     // phones resize the viewport when the URL bar slides; only re-hang on real layout changes
     if (Math.abs(W - builtW) > 40 || Math.abs(H - builtH) > 160) { builtW = W; builtH = H; build(); }
   }
@@ -152,7 +159,8 @@ const mount: Mount = (root) => {
         px[B] -= dx * kb; py[B] -= dy * kb; pz[B] -= dz * kb;
       }
     }
-    if (tore && t - lastTearSound > 0.08) { swish(0.12, 2600, 0.1); lastTearSound = t; }
+    if (tore) topo++;
+    if (tore && t - lastTearSound > 0.08) { tearSound(); lastTearSound = t; }
   }
 
   const colCache = new Map<number, string>();
@@ -164,6 +172,7 @@ const mount: Mount = (root) => {
   }
 
   function draw() {
+    if (gl) { gl.draw(topo); return; }
     ctx.clearRect(0, 0, W, H);
     const ry = y0 - 6;
     ctx.strokeStyle = 'rgba(20,20,20,.55)'; ctx.lineWidth = 1.2;
@@ -214,7 +223,8 @@ const mount: Mount = (root) => {
       u = u < 0 ? 0 : u > 1 ? 1 : u;
       if ((ax + u * vx - cx) ** 2 + (ay + u * vy - cy) ** 2 < r2) { alive[c] = 0; any = true; }
     }
-    if (any && t - lastTearSound > 0.06) { swish(0.08, 4200, 0.08); lastTearSound = t; }
+    if (any) topo++;
+    if (any && t - lastTearSound > 0.06) { sample(['scratch_001', 'scratch_002'], { gain: 0.25, jitter: 0.15 }, () => swish(0.08, 4200, 0.08)); lastTearSound = t; }
   }
 
   // The canvas ignores pointer events so links painted on the wall stay clickable.
@@ -256,13 +266,31 @@ const mount: Mount = (root) => {
   const onKey = (e: KeyboardEvent) => { if (e.key === 'r' && !(e.target as Element).closest('input,textarea')) build(); };
   addEventListener('keydown', onKey);
 
+  const state = () => ({ W, H, cols, rows, sp, x0, y0, cw, px, py, pz, alive, hC, vC, pin, kind });
+  function tearSound() { sample(['scratch_002', 'scratch_004'], { gain: 0.3, jitter: 0.2 }, () => swish(0.12, 2600, 0.1)); }
+  preload(['scratch_001', 'scratch_002', 'scratch_004']);
+  // the 2D cloth paints immediately; the WebGL one (real weave, lighting and a
+  // cast shadow) loads in the background and takes over when it's ready
+  let gone = false;
+  const probe = document.createElement('canvas');
+  if (probe.getContext('webgl2')) {
+    void import('./gl').then((m) => {
+      if (gone) return;
+      try {
+        gl = m.linenGL(glc);
+        gl.resize(W, H, dpr); gl.rebuild(state()); gl.draw(topo);
+        root.classList.add('webgl');
+      } catch { gl = null; }
+    });
+  }
+
   const ro = new ResizeObserver(resize);
   ro.observe(cv);
   resize();
   // adaptive quality: fewer constraint passes on slow devices
   const stop = fixed(step, draw, (ms) => { iters = ms > 6 ? 3 : ms > 3.5 ? 4 : 5; });
 
-  return () => { stop(); ro.disconnect(); removeEventListener('keydown', onKey); };
+  return () => { gone = true; stop(); ro.disconnect(); removeEventListener('keydown', onKey); gl?.dispose(); };
 };
 
 export default mount;

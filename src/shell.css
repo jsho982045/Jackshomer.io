@@ -43,6 +43,9 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
   color: inherit; text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer;
 }
 .dock .dk-home { font-weight: 800; letter-spacing: 0.02em; }
+.dock .dk-cv { gap: 6px; padding: 0 12px 0 10px; }
+.dock .dk-cv svg { width: 17px; height: 17px; }
+@media (max-width: 480px) { .dock .dk-cv span { display: none; } .dock .dk-cv { padding: 0 10px; } }
 .dock .dk-step { font-size: 22px; padding: 0 8px; line-height: 1; }
 .dock a:hover, .dock button:hover { background: rgba(127, 127, 127, 0.16); }
 .dock :focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
@@ -58,7 +61,7 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .dk-menu a[aria-current] { background: rgba(127, 127, 127, 0.18); font-weight: 700; }
 .dk-menu i { width: 14px; height: 14px; border-radius: 4px; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
 .sw-linen { --sw: #d9cdb4; } .sw-desk { --sw: #7a4a2c; } .sw-machine { --sw: #c7c6c0; }
-.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-ask { --sw: #d97757; } .sw-story { --sw: #a3321f; }
+.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-ask { --sw: #d97757; } .sw-story { --sw: #a3321f; } .sw-resume { --sw: #ece7dd; } .sw-built { --sw: #10233f; }
 .dk-menu hr { border: 0; border-top: 1px solid var(--dk-line); margin: 4px 6px; width: auto; }
 
 /* ---------- design-to-design transition ---------- */
@@ -96,6 +99,7 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .hub .story:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
 @media (max-width: 700px) { .hub .story { grid-template-columns: minmax(0, 1fr); } }
 .hub .foot { margin-top: 36px; color: #9d998f; font-size: 14px; }
+.hub .foot a { color: #eeebe4; text-underline-offset: 3px; }
 .hub kbd { font: inherit; padding: 1px 6px; border: 1px solid #555; border-radius: 5px; }
 @media (max-width: 900px) { .hub .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .hub .grid { grid-template-columns: minmax(0, 1fr); } .hub a.sw { min-height: 230px; } }

@@ -1,7 +1,7 @@
 import '@fontsource-variable/instrument-sans';
 import '@fontsource-variable/newsreader';
 import './shell.css';
-import { designs, pages, byPath, type DesignMeta } from './designs/registry';
+import { designs, pages, notFound, byPath, type DesignMeta } from './designs/registry';
 import { mountHub } from './hub';
 
 const stage = document.getElementById('stage')!;
@@ -15,7 +15,7 @@ const clean = (p: string) => p.replace(/\/+$/, '') || '/';
 async function render(path: string, push: boolean) {
   path = clean(path);
   if (path === current) return;
-  const meta = byPath(path);
+  const meta = byPath(path) ?? (path === '/' ? undefined : notFound);
   const my = ++token;
   if (push) history.pushState(null, '', path);
   let mount = mountHub as unknown as (el: HTMLElement, nav: (p: string) => void) => () => void;
@@ -78,6 +78,7 @@ const dock = (() => {
   nav.setAttribute('aria-label', 'Designs');
   nav.innerHTML = `
     <a class="dk-home" href="/" aria-label="All designs">JS</a>
+    <a class="dk-cv" href="/resume" aria-label="Résumé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Résumé</span></a>
     <a class="dk-step dk-prev" aria-label="Previous design">‹</a>
     <button class="dk-cur" aria-expanded="false" aria-controls="dk-menu"><span class="dk-name">All designs</span></button>
     <a class="dk-step dk-next" aria-label="Next design">›</a>

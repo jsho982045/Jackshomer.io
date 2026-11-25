@@ -1,7 +1,7 @@
 import '@fontsource-variable/rubik';
 import './gel.css';
 import { fixed, fitCanvas } from '../../lib/loop';
-import { click } from '../../lib/sound';
+import { click, sample, preload } from '../../lib/sound';
 import { jack, ai } from '../../content/jack';
 import type { Mount } from '../registry';
 
@@ -30,12 +30,15 @@ const mount: Mount = (root) => {
     { k: '', col: '#2fb5a8', big: 0.55 }, { k: '', col: '#ff7a1a', big: 0.5 }, { k: '', col: '#e2263b', big: 0.45 }, { k: '', col: '#f4c20d', big: 0.5 },
   ];
   root.innerHTML = `
-    <canvas role="img" aria-label="A pile of gummy sweets, each labelled with a section of the site"></canvas>
+    <canvas class="gl" aria-hidden="true"></canvas>
+    <canvas class="c2d" role="img" aria-label="A pile of gummy sweets, each labelled with a section of the site"></canvas>
     <div class="sr" aria-label="Sections">${DATA.filter((d) => d.t).map((d, i) => `<button data-i="${i}">${d.t}</button>`).join('')}</div>
     <div class="sheet" role="dialog" aria-modal="false" aria-labelledby="gel-h"><h2 id="gel-h"></h2><div class="sb"></div><button data-close>Drop it back in</button></div>
     <div class="bar"><p><b>Gel.</b> Grab a gummy and throw it. Tap one without dragging to open it. Shake the pile.</p><button data-shake>Shake</button></div>`;
 
-  const cv = root.querySelector('canvas')!;
+  const cv = root.querySelector<HTMLCanvasElement>('canvas.c2d')!;
+  const glc = root.querySelector<HTMLCanvasElement>('canvas.gl')!;
+  let gl: ReturnType<typeof import('./gl').gelGL> | null = null, dpr = 1;
   const ctx = cv.getContext('2d')!;
   const sheet = root.querySelector<HTMLDivElement>('.sheet')!;
   let W = 0, H = 0, floor = 0, blobs: Blob[] = [];
@@ -52,13 +55,15 @@ const mount: Mount = (root) => {
       for (let i = 0; i < N; i++) { const t = (i / N) * Math.PI * 2; b.x[i] = b.ox[i] = x0 + Math.cos(t) * r; b.y[i] = b.oy[i] = y0 + Math.sin(t) * r; }
       return b;
     });
+    gl?.setBlobs(blobs);
   }
   let sizedW = 0;
   function resize() {
     const s = fitCanvas(cv, 2);
     W = s.w; H = s.h;
-    ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
+    ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0); dpr = s.dpr;
     floor = H - (W < 600 ? 128 : 96);
+    gl?.resize(W, H, dpr, floor);
     if (!blobs.length || Math.abs(W - sizedW) > 60) { sizedW = W; spawn(); }
   }
 
@@ -118,6 +123,7 @@ const mount: Mount = (root) => {
   }
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    if (gl) { gl.draw(blobs); labels(); return; }
     ctx.fillStyle = 'rgba(120,80,50,.08)';
     ctx.fillRect(0, floor, W, H - floor);
     for (const b of blobs) {
@@ -138,7 +144,13 @@ const mount: Mount = (root) => {
       const g3 = ctx.createLinearGradient(0, b.cy - b.r, 0, b.cy + b.r);
       g3.addColorStop(0, 'rgba(255,255,255,.75)'); g3.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g3; ctx.fill(); ctx.restore();
-      if (b.k) {
+      label(b);
+    }
+  }
+
+  function labels() { for (const b of blobs) label(b); }
+  function label(b: Blob) {
+    if (b.k) {
         let a = Math.atan2(b.y[0] - b.cy, b.x[0] - b.cx);
         if (a > Math.PI / 2) a -= Math.PI; if (a < -Math.PI / 2) a += Math.PI;
         a *= 0.35; // follow the body's spin a little, but stay readable
@@ -151,7 +163,6 @@ const mount: Mount = (root) => {
         ctx.fillStyle = b.dark; ctx.fillText(b.k, 0, 2); ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillText(b.k, 0, 0);
         ctx.restore();
       }
-    }
   }
 
   function pick(x: number, y: number) {
@@ -169,7 +180,7 @@ const mount: Mount = (root) => {
     for (let i = 0; i < N; i++) { const d = (b.x[i] - mx) ** 2 + (b.y[i] - my) ** 2; if (d < bd) { bd = d; bi = i; } }
     gb = b; gi = bi; down = { b, x: mx, y: my, t: performance.now() };
     root.classList.add('grabbing');
-    click(500, 0.06, 0.12, 120, 0.8);
+    sample(['pluck_001', 'pluck_002'], { gain: 0.35, jitter: 0.25 }, () => click(500, 0.06, 0.12, 120, 0.8));
   });
   cv.addEventListener('pointermove', (e) => { [mx, my] = pos(e); });
   const up = () => {
@@ -197,11 +208,21 @@ const mount: Mount = (root) => {
   const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') sheet.classList.remove('on'); };
   addEventListener('keydown', onKey);
 
+  preload(['pluck_001', 'pluck_002']);
+  // 2D first, then the WebGL gummies (refraction, absorption, real highlights) take over
+  let gone = false;
+  if (document.createElement('canvas').getContext('webgl2')) {
+    void import('./gl').then((m) => {
+      if (gone) return;
+      try { gl = m.gelGL(glc, N); gl.resize(W, H, dpr, floor); gl.setBlobs(blobs); root.classList.add('webgl'); } catch { gl = null; }
+    });
+  }
+
   const ro = new ResizeObserver(resize);
   ro.observe(cv);
   resize();
   const stop = fixed(step, draw);
-  return () => { stop(); ro.disconnect(); removeEventListener('keydown', onKey); };
+  return () => { gone = true; stop(); ro.disconnect(); removeEventListener('keydown', onKey); gl?.dispose(); };
 };
 
 export default mount;
