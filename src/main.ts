@@ -1,6 +1,7 @@
 import '@fontsource-variable/instrument-sans';
+import '@fontsource-variable/newsreader';
 import './shell.css';
-import { designs, byPath, type DesignMeta } from './designs/registry';
+import { designs, pages, byPath, type DesignMeta } from './designs/registry';
 import { mountHub } from './hub';
 
 const stage = document.getElementById('stage')!;
@@ -82,6 +83,8 @@ const dock = (() => {
     <a class="dk-step dk-next" aria-label="Next design">›</a>
     <div class="dk-menu" id="dk-menu" hidden>
       <a href="/"><i style="--sw:#3a3a3a"></i>All designs</a>
+      ${pages.map((d) => `<a href="${d.path}" data-id="${d.id}"><i class="sw-${d.id}"></i>${d.name}</a>`).join('')}
+      <hr>
       ${designs.map((d) => `<a href="${d.path}" data-id="${d.id}"><i class="sw-${d.id}"></i>${d.name}</a>`).join('')}
     </div>`;
   document.body.append(nav);

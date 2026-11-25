@@ -30,4 +30,9 @@ export const designs: DesignMeta[] = [
   { id: 'ask', path: '/ask', name: 'Ask', tone: 'auto', blurb: 'A small assistant that only knows one subject: me.', load: memo(() => import('./ask/ask')) },
 ];
 
-export const byPath = (p: string) => designs.find((d) => d.path === p);
+/** Pages that aren't designs: reachable from every design, but not in the [ ] rotation. */
+export const pages: DesignMeta[] = [
+  { id: 'story', path: '/story', name: 'My story', tone: 'light', blurb: 'The long way in: data analyst to founding engineer.', load: memo(() => import('./story/story')) },
+];
+
+export const byPath = (p: string) => designs.find((d) => d.path === p) ?? pages.find((d) => d.path === p);

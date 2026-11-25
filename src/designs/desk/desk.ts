@@ -4,7 +4,7 @@ import '@fontsource/caveat/700.css';
 import './desk.css';
 import { loop } from '../../lib/loop';
 import { swish, click } from '../../lib/sound';
-import { jack } from '../../content/jack';
+import { jack, jobs, ai } from '../../content/jack';
 import type { Mount } from '../registry';
 
 /**
@@ -29,14 +29,15 @@ const mount: Mount = (root) => {
     <div class="walnut"></div>
     <div class="surface">
       <div class="o card flip" data-w="350" data-h="200" tabindex="0" aria-label="Business card. Press Enter to flip."><div class="sk in"><div class="face paper"><div><h1>${jack.name}</h1><div class="role">Software engineer · Brooklyn</div></div><div class="row"><span>${jack.role}, ${jack.company}</span><span>jackshomer.io</span></div></div><div class="face backf"><span>jackshomer.io</span><small>github.com/${jack.githubHandle}</small></div></div></div>
-      <div class="o idx" data-w="330" data-h="214" tabindex="0" aria-label="Index card: tools"><div class="sk"><b>Things I reach for</b><br>${jack.stack.slice(0, 2).join(' · ')}<br>${jack.stack.slice(2, 4).join(' · ')}<br>three.js when nobody stops me</div></div>
+      <div class="o idx" data-w="330" data-h="214" tabindex="0" aria-label="Index card: tools"><div class="sk"><b>Things I reach for</b><br>Laravel · React<br>TypeScript · Node<br>Postgres · AWS<br>three.js when nobody stops me</div></div>
       ${jack.projects
         .map((p, i) => `<div class="o pol ${['pic-rail', 'pic-oneart', 'pic-arcade'][i]} flip" data-w="236" data-h="282" tabindex="0" aria-label="Photo: ${p.name}. Press Enter to flip."><div class="sk in"><div class="face"><div class="pic"></div><div class="cap">${i === 0 ? 'Shomer Valley' : p.name}</div></div><div class="face backf paper">${p.blurb}</div></div></div>`)
         .join('')}
       <div class="o pol pic-city flip" data-w="236" data-h="282" tabindex="0" aria-label="Photo: ${jack.company}. Press Enter to flip."><div class="sk in"><div class="face"><div class="pic"></div><div class="cap">${jack.company}, '25</div></div><div class="face backf paper">First hire. I lead ${jack.team}. ${jack.companyAbout[0].toUpperCase() + jack.companyAbout.slice(1)}, but make it fast.</div></div></div>
+      <div class="o pol pic-ai flip" data-w="300" data-h="262" tabindex="0" aria-label="Printed screenshot from ${ai.proofDate}. Press Enter to flip."><div class="sk in"><div class="face"><img class="shot" src="${ai.proofImage}" alt="Jack's message about ChatGPT, ${ai.proofDate}" width="929" height="620" draggable="false"><div class="cap">${ai.proofDate}</div></div><div class="face backf paper">Four days after ChatGPT launched (${ai.launchDate}), I was already sending it around. On AI since day four. <a href="/story">The story →</a></div></div></div>
       <div class="o fold" data-w="380" data-h="250" tabindex="0" aria-label="Résumé folder. Press Enter to open."><div class="sk"><div class="tab">résumé</div><div class="body">The long version<small>Double-tap to pull out the sheet.</small></div></div></div>
-      <div class="o res" data-w="420" data-h="460" tabindex="0" hidden aria-label="Résumé sheet"><div class="sk paper"><h2>${jack.name}</h2><p class="sub">${jack.title} · ${jack.location}</p><ol>${[...jack.path].reverse().map((s) => `<li><b>${s.when}</b><span>${s.what}</span></li>`).join('')}<li><b>School</b><span>${jack.study}, ${jack.school} (${jack.schoolYears})</span></li></ol></div></div>
-      <div class="o stk" data-w="190" data-h="190" tabindex="0"><div class="sk">open to good ideas &amp; side quests. ${contact}</div></div>
+      <div class="o res" data-w="440" data-h="520" tabindex="0" hidden aria-label="Résumé sheet"><div class="sk paper"><h2>${jack.name}</h2><p class="sub">${jack.title} · ${jack.location}</p><ol>${jobs.map((j) => `<li><b>${j.when.replace(' – ', '–')}</b><span><strong>${j.company}</strong> · ${j.title}</span></li>`).join('')}<li><b>${jack.schoolDates.replace(' – ', '–')}</b><span><strong>${jack.school}</strong> · ${jack.study}</span></li></ol></div></div>
+      <div class="o stk" data-w="190" data-h="190" tabindex="0"><div class="sk">the long way in → <a href="/story">read my story</a><br>${contact}</div></div>
       <div class="o tok" data-w="86" data-h="86" tabindex="0" aria-label="Brass token"><div class="sk">BKLYN</div></div>
       <div class="o pen" data-w="330" data-h="22" tabindex="0" aria-label="Pencil"><div class="sk"></div></div>
     </div>
@@ -54,9 +55,9 @@ const mount: Mount = (root) => {
   const folder = O.find((o) => o.el.classList.contains('fold'))!;
   const sheet = O.find((o) => o.el.classList.contains('res'))!;
   // [x, y, angle] as fractions of the viewport
-  const layout = [[0.24, 0.26, -0.08], [0.72, 0.2, 0.06], [0.64, 0.6, -0.14], [0.84, 0.56, 0.09], [0.45, 0.62, 0.15], [0.47, 0.36, 0.12], [0.24, 0.68, -0.04], [0.5, 0.5, 0.02], [0.9, 0.2, 0.18], [0.57, 0.18, 0.4], [0.36, 0.86, -0.25]];
+  const layout = [[0.24, 0.26, -0.08], [0.72, 0.2, 0.06], [0.64, 0.6, -0.14], [0.84, 0.56, 0.09], [0.45, 0.62, 0.15], [0.47, 0.36, 0.12], [0.4, 0.2, -0.07], [0.24, 0.68, -0.04], [0.5, 0.5, 0.02], [0.9, 0.2, 0.18], [0.57, 0.18, 0.4], [0.36, 0.86, -0.25]];
   // phones: a looser stack that still shows a corner of everything
-  const mobile = [[0.42, 0.2, -0.06], [0.6, 0.34, 0.08], [0.3, 0.5, -0.12], [0.7, 0.55, 0.1], [0.35, 0.72, 0.07], [0.68, 0.76, -0.08], [0.5, 0.42, 0.04], [0.5, 0.5, 0], [0.72, 0.14, 0.12], [0.18, 0.3, 0.3], [0.5, 0.88, -0.2]];
+  const mobile = [[0.42, 0.2, -0.06], [0.6, 0.34, 0.08], [0.3, 0.5, -0.12], [0.7, 0.55, 0.1], [0.35, 0.72, 0.07], [0.68, 0.76, -0.08], [0.45, 0.62, 0.05], [0.5, 0.42, 0.04], [0.5, 0.5, 0], [0.72, 0.14, 0.12], [0.18, 0.3, 0.3], [0.5, 0.88, -0.2]];
   let W = 0, H = 0, S = 1, z = 10;
   let grab: { o: Obj; r: [number, number]; sx: number; sy: number; t: number; id: number } | null = null;
   let mx = 0, my = 0, lastTap = { t: 0, o: null as Obj | null }, swishT = 0;

@@ -2,7 +2,7 @@ import '@fontsource-variable/rubik';
 import './gel.css';
 import { fixed, fitCanvas } from '../../lib/loop';
 import { click } from '../../lib/sound';
-import { jack } from '../../content/jack';
+import { jack, ai } from '../../content/jack';
 import type { Mount } from '../registry';
 
 /**
@@ -19,12 +19,13 @@ const mix = (h: string, f: number) => `rgb(${hex(h).map((v) => Math.max(0, Math.
 
 const mount: Mount = (root) => {
   root.className = 'design d-gel';
-  const contact = [jack.email && `<li><a href="mailto:${jack.email}">${jack.email}</a></li>`, `<li><a href="${jack.github}" target="_blank" rel="noopener">github.com/${jack.githubHandle}</a></li>`, `<li><a href="/ask">Ask the assistant</a></li>`].filter(Boolean).join('');
+  const contact = [jack.email && `<li><a href="mailto:${jack.email}">${jack.email}</a></li>`, `<li><a href="${jack.linkedin}" target="_blank" rel="noopener">LinkedIn</a></li>`, `<li><a href="${jack.github}" target="_blank" rel="noopener">github.com/${jack.githubHandle}</a></li>`, `<li><a href="/ask">Ask the assistant</a></li>`].filter(Boolean).join('');
   const DATA = [
     { k: 'Jack', col: '#e2263b', big: 1.35, t: jack.name, body: `<p>${jack.headline}</p><p>${jack.role} at ${jack.company}. Based in ${jack.location}.</p>` },
     { k: 'work', col: '#ff7a1a', big: 1, t: 'Work', body: `<p>${jack.role} at ${jack.company}, ${jack.companyAbout}, since ${jack.since}. I lead ${jack.team}.</p><ul>${jack.projects.map((p) => `<li><b>${p.name}.</b> ${p.blurb}</li>`).join('')}</ul>` },
     { k: 'stack', col: '#f4c20d', big: 0.9, t: 'Stack', body: `<p>${jack.stack.join(', ')}.</p>` },
-    { k: 'path', col: '#2a7de1', big: 0.95, t: 'Path', body: `<ul>${jack.path.map((p) => `<li>${p.what}</li>`).join('')}</ul><p>Studied ${jack.study} at ${jack.school}.</p>` },
+    { k: 'path', col: '#2a7de1', big: 0.95, t: 'Path', body: `<ul>${jack.path.map((p) => `<li>${p.what}</li>`).join('')}</ul><p>Studied ${jack.study} at ${jack.school}. <a href="/story">The full story →</a></p>` },
+    { k: 'story', col: '#1f8a70', big: 1.05, t: 'The long way in', body: `<p>Data analyst with no connections → coding teacher → unpaid intern → lead frontend → founding engineer. Building with AI since four days after ChatGPT launched (${ai.proofDate}).</p><p><a href="/story">Read the whole story →</a></p>` },
     { k: 'say hi', col: '#7b3fbf', big: 1, t: 'Say hi', body: `<ul>${contact}</ul>` },
     { k: '', col: '#2fb5a8', big: 0.55 }, { k: '', col: '#ff7a1a', big: 0.5 }, { k: '', col: '#e2263b', big: 0.45 }, { k: '', col: '#f4c20d', big: 0.5 },
   ];

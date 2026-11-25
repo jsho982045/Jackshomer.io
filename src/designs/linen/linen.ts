@@ -16,11 +16,13 @@ const mount: Mount = (root) => {
     <div class="wall"></div>
     <div class="behind">
       <h2>Hi, I'm ${jack.first}.</h2>
-      <p>${jack.role} at ${jack.company}, ${jack.companyAbout}, where I lead ${jack.team}. Before that, lead frontend at Nap York.</p>
+      <p>${jack.role} at ${jack.company}, ${jack.companyAbout}, where I lead ${jack.team}. I got here the long way: data analyst, coding teacher, then an intern who became lead frontend engineer.</p>
       <p>Studied ${jack.study} at ${jack.school}. Based in ${jack.location}.</p>
       <ul>
         <li><a href="${jack.github}" target="_blank" rel="noopener">GitHub</a></li>
         ${jack.email ? `<li><a href="mailto:${jack.email}">${jack.email}</a></li>` : ''}
+        <li><a href="/story">Read my story</a></li>
+        <li><a href="${jack.linkedin}" target="_blank" rel="noopener">LinkedIn</a></li>
         <li><a href="/ask">Ask me anything</a></li>
       </ul>
     </div>

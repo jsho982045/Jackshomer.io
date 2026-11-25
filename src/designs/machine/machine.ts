@@ -3,7 +3,7 @@ import '@fontsource-variable/archivo/wdth.css';
 import './machine.css';
 import { loop } from '../../lib/loop';
 import { click, setMuted } from '../../lib/sound';
-import { jack } from '../../content/jack';
+import { jack, jobs, ai } from '../../content/jack';
 import type { Mount } from '../registry';
 
 /**
@@ -16,15 +16,15 @@ const U = (s: string) => s.toUpperCase();
 const mount: Mount = (root) => {
   root.className = 'design d-machine';
   const SEC: [string, string][] = [
-    ['About', `${U(jack.name)}\nSOFTWARE ENGINEER, ${U(jack.location)}\n\nI BUILD THINGS FOR THE WEB THAT\nFEEL LIKE THINGS YOU CAN HOLD.`],
-    ['Work', `${U(jack.role)} @ ${U(jack.company)}\nSINCE ${U(jack.since)}. ${U(jack.team)}.\n\nPRESS A KEY BELOW TO LOAD\nA SIDE PROJECT >`],
+    ['About', `${U(jack.name)}\nSOFTWARE ENGINEER, ${U(jack.location)}\n\nI BUILD THINGS FOR THE WEB THAT\nFEEL LIKE THINGS YOU CAN HOLD.\n\nFULL STORY: JACKSHOMER.IO/STORY`],
+    ['Work', `${U(jack.role)} @ ${U(jack.company)}\nSINCE ${U(jack.since)}. LEADS ${U(jack.team)}.\nLIVE PLATFORM, THOUSANDS OF USERS.\n\nPRESS A KEY BELOW TO LOAD\nA SIDE PROJECT >`],
     ['Stack', jack.stack.map((s, i) => U(s).padEnd(22, '.') + (i < 3 ? ' DAILY' : ' OFTEN')).join('\n')],
-    ['Path', `COVID     SELF-TAUGHT\nCOLLEGE   DATA ANALYST, APPAREL\n~1.5 YRS  TEACHING KIDS TO CODE\nNAP YORK  INTERN TO LEAD FRONTEND\n2025      ${U(jack.company)}, FIRST HIRE\n\nSTUDIED CS @ ${U(jack.school)}`],
-    ['Contact', `${jack.email ? U(jack.email) + '\n' : ''}JACKSHOMER.IO\nGITHUB / ${U(jack.githubHandle)}\n\nOR OPEN "ASK" (TOP RIGHT)\nAND ASK THE ASSISTANT.`],
+    ['Path', [...jobs].filter((j) => !j.minor).reverse().map((j) => `${j.start}  ${U(j.short)}`).join('\n') + `\n${U(jack.study)} @ ${U(jack.school)}`],
+    ['Contact', `${jack.email ? U(jack.email) + '\n' : ''}LINKEDIN / JACK-SHOMER\nGITHUB / ${U(jack.githubHandle)}\n\nOR OPEN "ASK" (TOP RIGHT)\nAND ASK THE ASSISTANT.`],
   ];
   const KEYS: [string, string][] = [
     ...jack.projects.map((p): [string, string] => [p.name.split(' ').slice(-1)[0], `${U(p.name)}\n\n${U(p.blurb)}`]),
-    ['Enter', '> READY_\nTURN THE DIAL. PRESS A KEY.\nFLIP THE BACKLIGHT.'],
+    ['AI', `AI SINCE DAY 4.\nCHATGPT LAUNCHED ${U(ai.launchDate)}.\nI WAS SHARING IT ${U(ai.proofDate)}.\n\n${ai.tools.slice(0, 5).map(U).join(' / ')}`],
   ];
   root.innerHTML = `
     <div class="dev">

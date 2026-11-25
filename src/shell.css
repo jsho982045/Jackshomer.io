@@ -58,7 +58,8 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .dk-menu a[aria-current] { background: rgba(127, 127, 127, 0.18); font-weight: 700; }
 .dk-menu i { width: 14px; height: 14px; border-radius: 4px; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
 .sw-linen { --sw: #d9cdb4; } .sw-desk { --sw: #7a4a2c; } .sw-machine { --sw: #c7c6c0; }
-.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-ask { --sw: #d97757; }
+.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-ask { --sw: #d97757; } .sw-story { --sw: #a3321f; }
+.dk-menu hr { border: 0; border-top: 1px solid var(--dk-line); margin: 4px 6px; width: auto; }
 
 /* ---------- design-to-design transition ---------- */
 ::view-transition-old(root) { animation: vt-out 0.28s cubic-bezier(.4, 0, .2, 1) both; }
@@ -83,6 +84,17 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .hub .cap { background: rgba(18, 18, 20, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 12px; padding: 14px 16px; }
 .hub .cap b { display: block; font-size: 19px; margin-bottom: 2px; }
 .hub .cap span { font-size: 14.5px; color: #d4d0c7; }
+/* the story strip on the home page */
+.hub .story { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 28px; align-items: center; margin: 0 0 36px; padding: 26px 28px; border-radius: 20px; background: #f6f1e7; color: #23201c; text-decoration: none; box-shadow: 0 18px 40px -18px rgba(0,0,0,.8); }
+.hub .story h2 { margin: 0 0 8px; font: 500 clamp(26px, 3.4vw, 36px)/1.1 'Newsreader Variable', Georgia, serif; letter-spacing: -.01em; }
+.hub .story p { margin: 0 0 12px; color: #5f584e; font-size: 16px; }
+.hub .story .go { font-weight: 700; color: #a3321f; }
+.hub .story figure { margin: 0; background: #fff; padding: 9px; transform: rotate(1.5deg); box-shadow: 0 12px 24px -10px rgba(40,25,10,.5); }
+.hub .story figure img { display: block; width: 100%; height: auto; }
+.hub .story figcaption { font-size: 12.5px; color: #6b645a; padding-top: 6px; }
+.hub .story:hover h2 { text-decoration: underline; text-decoration-color: #a3321f; text-underline-offset: 4px; }
+.hub .story:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+@media (max-width: 700px) { .hub .story { grid-template-columns: minmax(0, 1fr); } }
 .hub .foot { margin-top: 36px; color: #9d998f; font-size: 14px; }
 .hub kbd { font: inherit; padding: 1px 6px; border: 1px solid #555; border-radius: 5px; }
 @media (max-width: 900px) { .hub .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

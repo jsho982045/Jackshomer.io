@@ -5,7 +5,7 @@ import '@fontsource/caveat/700.css';
 import './cabin.css';
 import { logTexture, plankTexture, stoneTexture, rugTexture, forestTexture, pageTexture, labelTexture } from './textures';
 import { audioCtx, click } from '../../lib/sound';
-import { jack } from '../../content/jack';
+import { jack, jobs } from '../../content/jack';
 import type { Mount } from '../registry';
 
 /**
@@ -246,7 +246,7 @@ const mount: Mount = (root) => {
     const coverMat = new THREE.MeshStandardMaterial({ color: '#5a2a1c', roughness: 0.7 });
     const notebook = new THREE.Group();
     const pageL = new THREE.MeshStandardMaterial({ map: pageTexture([`I'm ${jack.first}.`, `${jack.role},`, `${jack.company}.`, `Brooklyn, born & based.`, `I build web things`, `that feel like objects.`], 'About'), roughness: 0.95 });
-    const pageR = new THREE.MeshStandardMaterial({ map: pageTexture(['· Self-taught (Covid)', '· Data analyst', '· Taught kids to code', '· Nap York, lead frontend', `· ${jack.company}, first hire`, `· ${jack.school}, CS`], 'So far'), roughness: 0.95 });
+    const pageR = new THREE.MeshStandardMaterial({ map: pageTexture([...jobs].filter((j) => !j.minor).reverse().map((j) => `· ${j.start} ${j.company.split(' ')[0]}`).concat(`· ${jack.school}, CS`), 'So far'), roughness: 0.95 });
     for (const [i, pm] of [[-1, pageL], [1, pageR]] as const) {
       const pg = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.012, 0.4), [edgeMat, edgeMat, pm, coverMat, edgeMat, edgeMat]);
       pg.position.set(i * 0.152, 0.006, 0); pg.rotation.z = -i * 0.04; pg.castShadow = pg.receiveShadow = true; notebook.add(pg);
@@ -327,10 +327,10 @@ const mount: Mount = (root) => {
 
     // ---------- hotspots ----------
     const v = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
-    const contact = [jack.email && `<li><a href="mailto:${jack.email}">${jack.email}</a></li>`, `<li><a href="${jack.github}" target="_blank" rel="noopener">github.com/${jack.githubHandle}</a></li>`, `<li><a href="/ask">Ask the assistant</a></li>`].filter(Boolean).join('');
+    const contact = [jack.email && `<li><a href="mailto:${jack.email}">${jack.email}</a></li>`, `<li><a href="${jack.linkedin}" target="_blank" rel="noopener">LinkedIn</a></li>`, `<li><a href="${jack.github}" target="_blank" rel="noopener">github.com/${jack.githubHandle}</a></li>`, `<li><a href="/ask">Ask the assistant</a></li>`].filter(Boolean).join('');
     const hots: Hot[] = [
-      { id: 'about', label: 'About', obj: notebook, anchor: v(0.05, TY + 0.06, -0.62), view: [v(0.1, TY + 0.62, -0.1), v(0.05, TY, -0.66)], html: `<h2>${jack.name}</h2><p>${jack.headline}</p><p>${jack.role} at ${jack.company}. Studied ${jack.study} at ${jack.school}.</p>` },
-      { id: 'work', label: 'Work', obj: photo, anchor: v(0.72, TY + 0.33, -1.12), view: [v(0.5, TY + 0.25, -0.45), v(0.72, TY + 0.15, -1.12)], html: `<h2>${jack.company}</h2><p>${jack.role} (${jack.title}) since ${jack.since}. First hire at ${jack.companyAbout}; I now lead ${jack.team}.</p><p>Before that: lead frontend engineer at Nap York, where I started as an intern.</p>` },
+      { id: 'about', label: 'About', obj: notebook, anchor: v(0.05, TY + 0.06, -0.62), view: [v(0.1, TY + 0.62, -0.1), v(0.05, TY, -0.66)], html: `<h2>${jack.name}</h2><p>${jack.headline}</p><p>${jack.role} at ${jack.company}. I got here the long way: data analyst, coding teacher, intern, lead frontend.</p><p><a href="/story">Read my story →</a></p>` },
+      { id: 'work', label: 'Work', obj: photo, anchor: v(0.72, TY + 0.33, -1.12), view: [v(0.5, TY + 0.25, -0.45), v(0.72, TY + 0.15, -1.12)], html: `<h2>${jack.company}</h2><p>${jack.role} (${jack.title}) since ${jack.since}. First hire at ${jack.companyAbout}; I now lead ${jack.team}.</p><p>Before that:</p><ul>${jobs.slice(1).filter((j) => !j.minor).map((j) => `<li><b>${j.company}</b>, ${j.title} (${j.when})</li>`).join('')}</ul>` },
       { id: 'projects', label: 'Projects', obj: books, anchor: v(0.88, TY + 0.2, -0.62), view: [v(0.62, TY + 0.38, -0.05), v(0.88, TY + 0.06, -0.62)], html: `<h2>Side projects</h2><ul>${jack.projects.map((p) => `<li><b>${p.name}.</b> ${p.blurb}</li>`).join('')}</ul>` },
       { id: 'contact', label: 'Contact', obj: radio, anchor: v(0.15, TY + 0.25, -1.15), view: [v(0.15, TY + 0.3, -0.55), v(0.15, TY + 0.1, -1.15)], html: `<h2>Get in touch</h2><ul>${contact}</ul>` },
       { id: 'school', label: 'School', obj: diploma, anchor: v(-0.8, 1.98, -2.84), view: [v(-0.6, 1.7, -1.9), v(-0.8, 1.72, -2.84)], html: `<h2>${jack.school}</h2><p>${jack.study}, ${jack.schoolYears}. Before that, I taught myself with free online courses during Covid.</p>` },

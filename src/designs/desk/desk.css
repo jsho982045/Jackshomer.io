@@ -23,7 +23,7 @@
 .d-desk .card .row { display: flex; justify-content: space-between; gap: 10px; font: 13px/1.3 'Instrument Sans Variable', sans-serif; color: #333; }
 .d-desk .card .backf { background: #16213f var(--grain); color: #f3efe6; align-items: center; justify-content: center; text-align: center; font-size: 24px; gap: 6px; }
 .d-desk .card .backf small { font: 14px 'Instrument Sans Variable', sans-serif; opacity: .75; }
-.d-desk .idx .sk { background-color: #fdfcf7; background-image: var(--grain), linear-gradient(90deg, transparent 46px, #e6a3a3 46px, #e6a3a3 48px, transparent 48px), repeating-linear-gradient(transparent 0 33px, #a9c4e4 33px 34px); padding: 12px 18px 12px 60px; font: 500 25px/34px Caveat, cursive; color: #1f3f8f; }
+.d-desk .idx .sk { overflow: hidden; background-color: #fdfcf7; background-image: var(--grain), linear-gradient(90deg, transparent 46px, #e6a3a3 46px, #e6a3a3 48px, transparent 48px), repeating-linear-gradient(transparent 0 33px, #a9c4e4 33px 34px); padding: 12px 18px 12px 60px; font: 500 25px/34px Caveat, cursive; color: #1f3f8f; }
 .d-desk .idx b { font-weight: 700; color: #1b1b1b; }
 .d-desk .pol .face { background: #fbfaf6 var(--grain); padding: 14px 14px 0; }
 .d-desk .pol .pic { height: 200px; position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15), inset 0 0 30px rgba(0,0,0,.35); }
@@ -45,8 +45,9 @@
 .d-desk .res h2 { font: 800 24px/1.1 'Fraunces Variable', Georgia, serif; margin: 0 0 2px; }
 .d-desk .res .sub { margin: 0 0 16px; color: #555; }
 .d-desk .res ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px; }
-.d-desk .res li { display: grid; grid-template-columns: 76px 1fr; gap: 10px; }
-.d-desk .res li b { font-weight: 600; color: #8a2a1a; }
+.d-desk .res li { display: grid; grid-template-columns: 124px 1fr; gap: 10px; font-size: 13.5px; }
+.d-desk .res li strong { font-weight: 600; }
+.d-desk .res li b { font-weight: 600; color: #8a2a1a; font-size: 12.5px; }
 .d-desk .stk .sk { background: #f7e36b var(--grain); padding: 20px; font: 500 26px/1.15 Caveat, cursive; color: #2d2a14; }
 .d-desk .stk a { color: inherit; }
 .d-desk .tok .sk { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff0b8, #d9a93f 40%, #8a6420 85%); display: grid; place-items: center; font: 800 15px/1 'Fraunces Variable', serif; color: #6a4a12; text-shadow: 0 1px 0 rgba(255,240,190,.8); letter-spacing: .06em; box-shadow: inset 0 0 0 4px rgba(120,80,20,.5), 0 4px 6px rgba(0,0,0,.5); }
@@ -62,3 +63,7 @@
 .d-desk .pic-arcade .pic::before { content: ''; position: absolute; left: 50%; top: 46%; width: 8px; height: 8px; margin: -30px 0 0 -44px; background: transparent; color: #7cf0a0;
   box-shadow: 16px 0, 64px 0, 24px 8px, 56px 8px, 16px 16px, 24px 16px, 32px 16px, 40px 16px, 48px 16px, 56px 16px, 64px 16px, 8px 24px, 16px 24px, 32px 24px, 40px 24px, 48px 24px, 64px 24px, 72px 24px, 0 32px, 8px 32px, 16px 32px, 24px 32px, 32px 32px, 40px 32px, 48px 32px, 56px 32px, 64px 32px, 72px 32px, 80px 32px, 0 40px, 16px 40px, 64px 40px, 80px 40px, 24px 48px, 32px 48px, 48px 48px, 56px 48px; }
 .d-desk .pic-arcade .pic::after { content: '1UP 004200'; position: absolute; left: 10px; top: 8px; font: 12px/1 monospace; color: #ffd166; letter-spacing: .1em; }
+.d-desk .pic-ai .face:first-child { padding: 12px 12px 0; background: #fbfaf6 var(--grain); }
+.d-desk .pic-ai .shot { display: block; width: 100%; height: auto; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+.d-desk .pic-ai .cap { font-size: 24px; }
+.d-desk .backf a { color: inherit; }

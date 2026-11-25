@@ -1,0 +1,58 @@
+/* The story: a well-set book page. Warm paper, ink, one red accent for dates. */
+.d-story { --paper: #f6f1e7; --ink: #23201c; --soft: #6b645a; --rule: #ddd3c2; --red: #a3321f;
+  position: fixed; inset: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--paper); color: var(--ink);
+  font: 19px/1.7 'Newsreader Variable', Georgia, serif; -webkit-font-smoothing: antialiased; }
+.d-story::before { content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.d-story .book { position: relative; max-width: 1080px; margin: 0 auto; padding: 108px 24px 120px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; }
+.d-story header { grid-column: 1 / -1; max-width: 760px; margin: 0 0 8px auto; width: calc(100% - 276px); }
+.d-story h1 { font: 500 clamp(40px, 6vw, 64px)/1.02 'Newsreader Variable', Georgia, serif; letter-spacing: -.02em; margin: 0 0 18px; text-wrap: balance; }
+.d-story .dek { font-size: 22px; line-height: 1.5; color: var(--soft); margin: 0; max-width: 34em; }
+.d-story nav.toc { position: sticky; top: 96px; align-self: start; font: 14px/1.4 'Instrument Sans Variable', system-ui, sans-serif; }
+.d-story nav.toc a { display: grid; grid-template-columns: 74px 1fr; gap: 8px; padding: 7px 0; color: var(--soft); text-decoration: none; border-top: 1px solid var(--rule); }
+.d-story nav.toc a:hover, .d-story nav.toc a.on { color: var(--ink); }
+.d-story nav.toc a span:first-child { color: var(--red); font-variant-numeric: tabular-nums; }
+.d-story main { max-width: 760px; }
+.d-story section { padding: 34px 0 6px; border-top: 1px solid var(--rule); scroll-margin-top: 80px; }
+.d-story section:first-child { border-top: 0; padding-top: 8px; }
+.d-story h2 { font: 600 28px/1.2 'Newsreader Variable', Georgia, serif; margin: 0 0 4px; letter-spacing: -.01em; }
+.d-story .when { font: 600 13px/1 'Instrument Sans Variable', system-ui, sans-serif; color: var(--red); margin: 0 0 16px; letter-spacing: .02em; }
+.d-story p { margin: 0 0 18px; }
+.d-story section:first-child p.when + p::first-letter { float: left; font-size: 3.4em; line-height: .86; padding: 6px 10px 0 0; font-weight: 600; }
+/* the proof: a photo-print of the message, taped onto the page */
+.d-story figure.proof { margin: 26px 0 30px; display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 26px; align-items: center; }
+.d-story .print { position: relative; background: #fff; padding: 12px 12px 14px; transform: rotate(-1.2deg); box-shadow: 0 1px 1px rgba(0,0,0,.12), 0 14px 26px -12px rgba(40,25,10,.45); }
+.d-story .print img { display: block; width: 100%; height: auto; border-radius: 2px; }
+.d-story .print::before, .d-story .print::after { content: ''; position: absolute; top: -12px; width: 86px; height: 26px; background: rgba(240, 226, 180, .75); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.d-story .print::before { left: 22px; transform: rotate(-6deg); }
+.d-story .print::after { right: 22px; transform: rotate(5deg); }
+.d-story figcaption { font: 15px/1.5 'Instrument Sans Variable', system-ui, sans-serif; color: var(--soft); }
+.d-story figcaption b { display: block; color: var(--ink); font-size: 17px; margin-bottom: 6px; }
+.d-story figcaption .gap { display: flex; align-items: baseline; gap: 8px; margin: 10px 0; color: var(--ink); }
+.d-story figcaption .gap strong { font: 600 34px/1 'Newsreader Variable', Georgia, serif; color: var(--red); }
+.d-story blockquote { margin: 6px 0 22px; padding: 4px 0 4px 20px; border-left: 3px solid var(--red); font-style: italic; font-size: 22px; line-height: 1.45; }
+.d-story ul.tools { list-style: none; padding: 0; margin: 4px 0 22px; display: flex; flex-wrap: wrap; gap: 8px; font: 14px 'Instrument Sans Variable', system-ui, sans-serif; }
+.d-story ul.tools li { padding: 5px 12px; border: 1px solid var(--rule); border-radius: 999px; background: rgba(255,255,255,.5); }
+.d-story ul.small { columns: 2; column-gap: 28px; padding-left: 20px; margin: 0 0 22px; font-size: 17px; }
+.d-story a { color: inherit; text-decoration-color: var(--red); text-underline-offset: 3px; }
+.d-story .projects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 6px 0 22px; }
+.d-story .projects div { padding: 16px; border: 1px solid var(--rule); border-radius: 12px; background: rgba(255,255,255,.45); font-size: 16px; line-height: 1.5; }
+.d-story .projects b { display: block; font-size: 18px; margin-bottom: 4px; }
+.d-story footer { margin-top: 40px; padding: 28px; border-radius: 16px; background: var(--ink); color: #f6f1e7; font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 16px; }
+.d-story footer h3 { margin: 0 0 6px; font: 500 26px/1.2 'Newsreader Variable', Georgia, serif; }
+.d-story footer p { margin: 0 0 14px; color: #cfc6b6; }
+.d-story footer .links { display: flex; flex-wrap: wrap; gap: 10px; }
+.d-story footer .links a { padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid rgba(246,241,231,.25); text-decoration: none; }
+.d-story footer .links a:first-child { background: #f6f1e7; color: var(--ink); }
+.d-story :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+@media (max-width: 860px) {
+  .d-story .book { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 92px; }
+  .d-story header { width: auto; margin: 0 0 22px; }
+  .d-story nav.toc { position: static; display: flex; gap: 6px; overflow-x: auto; margin: 0 0 18px; padding-bottom: 6px; }
+  .d-story nav.toc a { flex: none; display: block; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; }
+  .d-story nav.toc a span:first-child { display: none; }
+  .d-story figure.proof { grid-template-columns: minmax(0, 1fr); }
+  .d-story .projects { grid-template-columns: minmax(0, 1fr); }
+  .d-story ul.small { columns: 1; }
+  .d-story { font-size: 18px; }
+}
