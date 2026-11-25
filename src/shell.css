@@ -1,0 +1,110 @@
+/* Shell: reset, the stage, the dock, transitions, the home hub.
+   Every design's own CSS is scoped under its root class (.d-<id>) because
+   design CSS is prefetched and stays in the document after loading. */
+*,
+*::before,
+*::after { box-sizing: border-box; min-width: 0; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: #1b1c1e;
+  color: #eeebe4;
+  font: 16px/1.5 'Instrument Sans Variable', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: clip;
+}
+button { font: inherit; color: inherit; }
+#stage, .design { position: relative; min-height: 100%; }
+html[data-design]:not([data-design='home']):not([data-design='ask']) body { overflow: hidden; }
+
+/* ---------- loading hint (only shows if a chunk takes >150ms) ---------- */
+html[data-loading] .dock::after {
+  content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  background-size: 50% 100%; background-repeat: no-repeat;
+  animation: dk-load 0.9s linear infinite 0.15s; opacity: 0.8;
+}
+@keyframes dk-load { from { background-position: -50% 0; } to { background-position: 150% 0; } }
+
+/* ---------- dock ---------- */
+.dock {
+  --dk-bg: rgba(20, 20, 22, 0.62); --dk-ink: #f3f0ea; --dk-line: rgba(255, 255, 255, 0.16);
+  position: fixed; z-index: 1000; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right));
+  display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px;
+  background: var(--dk-bg); color: var(--dk-ink); border: 1px solid var(--dk-line);
+  backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.5);
+  view-transition-name: dock;
+}
+html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a2522; --dk-line: rgba(0, 0, 0, 0.1); }
+.dock a, .dock button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 40px; height: 40px; padding: 0 12px; border-radius: 999px; border: 0; background: none;
+  color: inherit; text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.dock .dk-home { font-weight: 800; letter-spacing: 0.02em; }
+.dock .dk-step { font-size: 22px; padding: 0 8px; line-height: 1; }
+.dock a:hover, .dock button:hover { background: rgba(127, 127, 127, 0.16); }
+.dock :focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.dk-cur::before { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--sw, #777); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+.dk-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; width: 220px; padding: 6px; border-radius: 16px;
+  background: var(--dk-bg); border: 1px solid var(--dk-line);
+  backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.55); display: grid;
+}
+.dk-menu[hidden] { display: none; }
+.dock .dk-menu a { justify-content: flex-start; border-radius: 10px; height: 42px; font-weight: 500; }
+.dk-menu a[aria-current] { background: rgba(127, 127, 127, 0.18); font-weight: 700; }
+.dk-menu i { width: 14px; height: 14px; border-radius: 4px; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+.sw-linen { --sw: #d9cdb4; } .sw-desk { --sw: #7a4a2c; } .sw-machine { --sw: #c7c6c0; }
+.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-ask { --sw: #d97757; }
+
+/* ---------- design-to-design transition ---------- */
+::view-transition-old(root) { animation: vt-out 0.28s cubic-bezier(.4, 0, .2, 1) both; }
+::view-transition-new(root) { animation: vt-in 0.38s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes vt-out { to { opacity: 0; transform: scale(0.985); filter: blur(4px); } }
+@keyframes vt-in { from { opacity: 0; transform: scale(1.015); } }
+
+/* ---------- home hub ---------- */
+.hub { max-width: 1180px; margin: 0 auto; padding: clamp(80px, 9vw, 110px) max(4vw, 16px) 56px; }
+.hub h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 14px; font-weight: 700; text-wrap: balance; }
+.hub .lede { max-width: 58ch; color: #c9c5bc; font-size: 17px; margin: 0 0 36px; }
+.hub .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.hub a.sw {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 300px; padding: 18px;
+  border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit; isolation: isolate;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+  transition: transform 0.3s cubic-bezier(.3, 1.4, .5, 1);
+}
+.hub a.sw:hover { transform: translateY(-4px); }
+.hub a.sw:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.hub .mat { position: absolute; inset: 0; z-index: -1; }
+.hub .cap { background: rgba(18, 18, 20, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 12px; padding: 14px 16px; }
+.hub .cap b { display: block; font-size: 19px; margin-bottom: 2px; }
+.hub .cap span { font-size: 14.5px; color: #d4d0c7; }
+.hub .foot { margin-top: 36px; color: #9d998f; font-size: 14px; }
+.hub kbd { font: inherit; padding: 1px 6px; border: 1px solid #555; border-radius: 5px; }
+@media (max-width: 900px) { .hub .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .hub .grid { grid-template-columns: minmax(0, 1fr); } .hub a.sw { min-height: 230px; } }
+
+/* swatch materials (pure CSS, no images) */
+.m-linen { background: repeating-linear-gradient(0deg, rgba(0,0,0,.05) 0 2px, transparent 2px 4px), repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 2px, transparent 2px 4px), #e2d8c4; }
+.m-linen::before { content: 'JACK SHOMER'; position: absolute; left: 22px; top: 20px; right: 22px; font: 900 44px/.95 'Arial Black', sans-serif; color: #b0242c; }
+.m-linen::after { content: ''; position: absolute; inset: 10px; border: 3px dashed #2c3e8c; border-radius: 8px; opacity: .75; }
+.m-desk { background: linear-gradient(100deg, rgba(0,0,0,.18), transparent 35%, rgba(0,0,0,.1) 65%, transparent), repeating-linear-gradient(2deg, #6e4126 0 7px, #7a4a2c 7px 11px, #64391f 11px 19px); }
+.m-desk::before { content: ''; position: absolute; left: 22px; top: 26px; width: 58%; height: 42%; background: #fbfaf6; transform: rotate(-6deg); box-shadow: 0 8px 14px rgba(0,0,0,.45); }
+.m-desk::after { content: ''; position: absolute; right: 24px; top: 34px; width: 28%; aspect-ratio: 1; background: #f7e36b; transform: rotate(8deg); box-shadow: 0 8px 14px rgba(0,0,0,.45); }
+.m-machine { background: linear-gradient(160deg, #e3e2dd, #b3b2ac); }
+.m-machine::before { content: 'JS-1 READY_'; position: absolute; left: 20px; right: 20px; top: 20px; padding: 10px 12px; border: 7px solid #1d1d1f; border-radius: 8px; background: linear-gradient(165deg, #a9b69d, #8e9c84); color: #1d2a20; font: 26px/1 monospace; }
+.m-machine::after { content: ''; position: absolute; right: 28px; top: 104px; width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #4a4a4a, #1c1c1c 70%); box-shadow: 0 0 0 6px #222; }
+.m-gel { background: radial-gradient(ellipse at 50% 30%, #fbf3ea, #e3d3c1); }
+.m-gel::before, .m-gel::after { content: ''; position: absolute; border-radius: 50% 50% 46% 46% / 56% 56% 44% 44%; box-shadow: 0 10px 14px -6px rgba(90,45,20,.4); }
+.m-gel::before { left: 24px; top: 30px; width: 130px; height: 110px; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.75) 0 10%, transparent 28%), radial-gradient(#ff4b5c, #b0142a); }
+.m-gel::after { left: 150px; top: 58px; width: 92px; height: 80px; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.75) 0 10%, transparent 28%), radial-gradient(#4f9bff, #1a5bb0); }
+.m-cabin { background: radial-gradient(ellipse 50% 40% at 30% 60%, rgba(255,150,60,.55), transparent 70%), linear-gradient(#1b2330, #0d1014 60%), #0d1014; }
+.m-cabin::before { content: ''; position: absolute; right: 22px; top: 22px; width: 42%; height: 46%; border: 6px solid #3a2616; background: linear-gradient(#3d4f66, #6f7f8e 60%, #24303a 60%); box-shadow: inset 0 0 20px rgba(0,0,0,.5); }
+.m-cabin::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(60,35,18,.0) 0 22px, rgba(0,0,0,.35) 22px 24px); }
+.m-ask { background: #f6f1ea; }
+.m-ask::before { content: 'What does Jack do?'; position: absolute; right: 20px; top: 22px; padding: 10px 14px; border-radius: 14px; background: #ebe4d9; color: #2a2522; font-size: 15px; }
+.m-ask::after { content: 'He is a founding engineer at UrbanLogic…'; position: absolute; left: 20px; top: 76px; right: 40px; color: #2a2522; font: 18px/1.4 'Newsreader Variable', Georgia, serif; }
