@@ -34,7 +34,7 @@ const FACTS = [
   `Jobs (newest first):\n${jobs.map((j) => `- ${j.company} — ${j.title} (${j.when}, ${j.where}). ${j.summary}${j.minor ? ' [minor role: mention only if asked]' : ''}`).join('\n')}`,
   `Skills: languages ${jack.skills.languages.join(', ')}; frameworks ${jack.skills.frameworks.join(', ')}; data ${jack.skills.data.join(', ')}; cloud ${jack.skills.cloud.join(', ')}; tools ${jack.skills.tools.join(', ')}; AI tools ${jack.skills.ai.join(', ')}.`,
   `AI: ChatGPT launched ${ai.launchDate}; on ${ai.proofDate} (four days later) Jack was already sending it to friends — a screenshot is on /story#ai. His line: "${ai.line}"`,
-  `Projects: ${jack.projects.map((p) => `${p.name} (${p.blurb}${p.url ? ' ' + p.url : ''})`).join('; ')}. Early small projects: ${jack.smallProjects.map((p) => p.name).join(', ')} — all at ${jack.allProjectsUrl}.`,
+  `Projects: ${jack.projects.map((p) => `${p.name} (${p.blurb}${p.highlights.length ? ' Highlights: ' + p.highlights.join('; ') + '.' : ''} ${p.url})`).join('; ')}. Early small projects: ${jack.smallProjects.map((p) => `${p.name} (${p.blurb} ${p.url})`).join(', ')}. More on GitHub: ${jack.allProjectsUrl}.`,
   `Contact: email ${jack.email}; LinkedIn ${jack.linkedin}; GitHub ${jack.github}. Résumé: /resume (PDF at /Jack_Shomer_Resume.pdf).`,
   `His story, in his own words:\n${story.map((c) => `## ${c.title} (${c.when})\n${c.body.join('\n')}`).join('\n\n')}`,
   `This website: six physical designs (Linen cloth, Desk, Machine, Gel, Cabin, Ask) plus /story, /resume and /built ("How this site is built"). Built with Vite + TypeScript and three.js, hand-written physics, built with AI agents under his direction.`,

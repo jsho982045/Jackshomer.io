@@ -18,6 +18,11 @@ export function mountHub(el: HTMLElement) {
           )
           .join('')}
       </div>
+      <h2 class="pj-h" id="projects">Projects</h2>
+      <div class="pjs">
+        ${jack.projects.map((p) => `<a class="pj big" href="${p.url}" target="_blank" rel="noopener"><b>${p.name} <span aria-hidden="true">↗</span></b><p>${p.blurb}</p>${p.highlights.length ? `<ul>${p.highlights.map((h) => `<li>${h}</li>`).join('')}</ul>` : ''}<small>${new URL(p.url).host}</small></a>`).join('')}
+        ${jack.smallProjects.map((p) => `<a class="pj" href="${p.url}" target="_blank" rel="noopener"><b>${p.name} <span aria-hidden="true">↗</span></b><p>${p.blurb}</p></a>`).join('')}
+      </div>
       <p class="foot"><a href="/resume">Résumé</a> · <a href="/built">How this site is built</a> · Tip: <kbd>[</kbd> and <kbd>]</kbd> step between designs.</p>
     </section>`;
   return () => {};

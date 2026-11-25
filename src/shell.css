@@ -124,3 +124,41 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .m-ask { background: #f6f1ea; }
 .m-ask::before { content: 'What does Jack do?'; position: absolute; right: 20px; top: 22px; padding: 10px 14px; border-radius: 14px; background: #ebe4d9; color: #2a2522; font-size: 15px; }
 .m-ask::after { content: 'He is a founding engineer at UrbanLogic…'; position: absolute; left: 20px; top: 76px; right: 40px; color: #2a2522; font: 18px/1.4 'Newsreader Variable', Georgia, serif; }
+
+/* ---------- Projects drawer (in the dock, available in every design) ---------- */
+.dock .dk-pj { gap: 6px; padding: 0 12px 0 10px; }
+.dock .dk-pj svg { width: 16px; height: 16px; }
+@media (max-width: 480px) { .dock .dk-pj span { display: none; } .dock .dk-pj { padding: 0 10px; } }
+.dk-proj {
+  position: absolute; top: calc(100% + 8px); right: 0; width: min(380px, calc(100vw - 20px)); max-height: min(78vh, 640px); overflow: auto;
+  padding: 8px; border-radius: 18px; display: grid; gap: 6px;
+  background: rgba(24, 23, 27, 0.96); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1eee8;
+  backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 24px 50px -16px rgba(0, 0, 0, 0.7);
+}
+.dk-proj[hidden] { display: none; }
+.dk-proj .dk-h { margin: 4px 8px 2px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+.dk-proj .dk-h small { font-weight: 400; opacity: 0.6; font-size: 12px; }
+.dock .dk-proj a { display: block; height: auto; padding: 10px 12px; border-radius: 12px; text-align: left; font-weight: 400; white-space: normal; text-decoration: none; color: inherit; }
+.dk-proj .pj { background: rgba(255, 255, 255, 0.06); }
+.dk-proj .pj b { display: block; font-size: 15px; margin-bottom: 2px; }
+.dk-proj .pj b span { opacity: 0.55; font-weight: 400; }
+.dk-proj .pj > span { display: block; font-size: 13px; line-height: 1.4; opacity: 0.8; }
+.dk-proj .pj ul { margin: 6px 0 0; padding-left: 16px; font-size: 12.5px; line-height: 1.45; opacity: 0.85; }
+.dk-proj .pj-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.dk-proj .pj-row .pj b { font-size: 14px; }
+.dk-proj .pj-row .pj > span { font-size: 12px; }
+.dock .dk-proj .pj-more { text-align: center; font-size: 13px; opacity: 0.75; padding: 8px; }
+.dock .dk-proj a:hover { background: rgba(127, 127, 127, 0.2); }
+.hub .pj-h { margin: 44px 0 14px; font-size: 22px; font-weight: 700; }
+.hub .pjs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.hub .pj { display: block; padding: 16px 18px; border-radius: 16px; background: #1c1c20; border: 1px solid #2c2c32; color: #eeebe4; text-decoration: none; transition: transform .2s, border-color .2s; }
+.hub .pj:hover { transform: translateY(-3px); border-color: #4a4a52; }
+.hub .pj:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.hub .pj b { font-size: 17px; } .hub .pj b span { color: #8d8a83; font-weight: 400; }
+.hub .pj p { margin: 6px 0 0; font-size: 14px; color: #c9c5bc; line-height: 1.45; }
+.hub .pj ul { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; color: #c9c5bc; line-height: 1.5; }
+.hub .pj small { display: block; margin-top: 10px; color: #8d8a83; font-size: 12.5px; }
+.hub .pj.big:first-child { background: linear-gradient(160deg, #1f2a1d, #1c1c20 60%); }
+@media (max-width: 900px) { .hub .pjs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hub .pj.big:first-child { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .hub .pjs { grid-template-columns: minmax(0, 1fr); } }

@@ -3,6 +3,7 @@ import '@fontsource-variable/newsreader';
 import './shell.css';
 import { designs, pages, notFound, byPath, type DesignMeta } from './designs/registry';
 import { mountHub } from './hub';
+import { jack } from './content/jack';
 
 const stage = document.getElementById('stage')!;
 const root = document.documentElement;
@@ -79,9 +80,16 @@ const dock = (() => {
   nav.innerHTML = `
     <a class="dk-home" href="/" aria-label="All designs">JS</a>
     <a class="dk-cv" href="/resume" aria-label="Résumé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Résumé</span></a>
+    <button class="dk-pj" aria-expanded="false" aria-controls="dk-proj" aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Projects</span></button>
     <a class="dk-step dk-prev" aria-label="Previous design">‹</a>
     <button class="dk-cur" aria-expanded="false" aria-controls="dk-menu"><span class="dk-name">All designs</span></button>
     <a class="dk-step dk-next" aria-label="Next design">›</a>
+    <div class="dk-proj" id="dk-proj" hidden>
+      <p class="dk-h">Projects <small>open in a new tab</small></p>
+      ${jack.projects.map((p) => `<a class="pj big" href="${p.url}" target="_blank" rel="noopener"><b>${p.name} <span aria-hidden="true">↗</span></b><span>${p.blurb}</span>${p.highlights.length ? `<ul>${p.highlights.map((h) => `<li>${h}</li>`).join('')}</ul>` : ''}</a>`).join('')}
+      <div class="pj-row">${jack.smallProjects.map((p) => `<a class="pj" href="${p.url}" target="_blank" rel="noopener"><b>${p.name} <span aria-hidden="true">↗</span></b><span>${p.blurb}</span></a>`).join('')}</div>
+      <a class="pj-more" href="${jack.allProjectsUrl}" target="_blank" rel="noopener">More on GitHub ↗</a>
+    </div>
     <div class="dk-menu" id="dk-menu" hidden>
       <a href="/"><i style="--sw:#3a3a3a"></i>All designs</a>
       ${pages.map((d) => `<a href="${d.path}" data-id="${d.id}"><i class="sw-${d.id}"></i>${d.name}</a>`).join('')}
@@ -93,17 +101,27 @@ const dock = (() => {
   const menu = nav.querySelector<HTMLDivElement>('.dk-menu')!;
   const prev = nav.querySelector<HTMLAnchorElement>('.dk-prev')!;
   const next = nav.querySelector<HTMLAnchorElement>('.dk-next')!;
+  const pjBtn = nav.querySelector<HTMLButtonElement>('.dk-pj')!;
+  const proj = nav.querySelector<HTMLDivElement>('.dk-proj')!;
   const setOpen = (o: boolean) => {
     menu.hidden = !o;
     cur.setAttribute('aria-expanded', String(o));
+    if (o) setProj(false);
+  };
+  const setProj = (o: boolean) => {
+    proj.hidden = !o;
+    pjBtn.setAttribute('aria-expanded', String(o));
+    if (o) setOpen(false);
   };
   cur.addEventListener('click', () => setOpen(menu.hidden));
+  pjBtn.addEventListener('click', () => setProj(proj.hidden));
   menu.addEventListener('click', () => setOpen(false));
+  proj.addEventListener('click', (e) => { if ((e.target as Element).closest('a')) setProj(false); });
   document.addEventListener('pointerdown', (e) => {
-    if (!nav.contains(e.target as Node)) setOpen(false);
+    if (!nav.contains(e.target as Node)) { setOpen(false); setProj(false); }
   });
   addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Escape') { setOpen(false); setProj(false); }
     const t = e.target as HTMLElement;
     if (t.closest('input,textarea,[contenteditable]')) return;
     if (e.key === '[') prev.click();

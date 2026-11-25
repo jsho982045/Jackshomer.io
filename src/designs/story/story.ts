@@ -30,10 +30,10 @@ const mount: Mount = (root) => {
     const quote = c.id === 'ai' ? `<blockquote>“${ai.line}”</blockquote>` : '';
     const projects =
       c.id === 'building'
-        ? `<div class="projects">${jack.projects.map((p) => `<div><b>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${p.name}</a>` : p.name}</b>${p.blurb}</div>`).join('')}</div>
+        ? `<div class="projects">${jack.projects.map((p) => `<div><b>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${p.name}</a>` : p.name}</b>${p.blurb}${p.highlights.length ? `<ul class="hl">${p.highlights.map((h) => `<li>${h}</li>`).join('')}</ul>` : ''}</div>`).join('')}</div>
            <p>A few of the early ones:</p>
            <ul class="small">${jack.smallProjects.map((p) => `<li><a href="${p.url}" target="_blank" rel="noopener">${p.name}</a></li>`).join('')}</ul>
-           <p><a href="${jack.allProjectsUrl}" target="_blank" rel="noopener">See all the early projects →</a></p>`
+           <p><a href="${jack.allProjectsUrl}" target="_blank" rel="noopener">More on GitHub →</a></p>`
         : '';
     const [first, ...rest] = c.body;
     return `<section id="${c.id}" aria-labelledby="h-${c.id}">

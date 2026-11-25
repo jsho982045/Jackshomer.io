@@ -23,7 +23,7 @@ const mount: Mount = (root) => {
     ['Contact', `${jack.email ? U(jack.email) + '\n' : ''}LINKEDIN / JACK-SHOMER\nGITHUB / ${U(jack.githubHandle)}\n\nOR OPEN "ASK" (TOP RIGHT)\nAND ASK THE ASSISTANT.`],
   ];
   const KEYS: [string, string][] = [
-    ...jack.projects.map((p): [string, string] => [p.name.split(' ').slice(-1)[0], `${U(p.name)}\n\n${U(p.blurb)}`]),
+    ...jack.projects.map((p): [string, string] => [p.name.split(' ')[0], `${U(p.name)}\n\n${U(p.blurb)}`]),
     ['AI', `AI SINCE DAY 4.\nCHATGPT LAUNCHED ${U(ai.launchDate)}.\nI WAS SHARING IT ${U(ai.proofDate)}.\n\n${ai.tools.slice(0, 5).map(U).join(' / ')}`],
   ];
   root.innerHTML = `

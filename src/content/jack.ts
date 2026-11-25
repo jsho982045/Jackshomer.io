@@ -181,7 +181,7 @@ export const story: Chapter[] = [
     title: 'Always building',
     when: 'Throughout',
     body: [
-      'Through all of it I kept shipping side projects. They started small: a Casio-style piano, Pac-Man from scratch, checkers with an AI opponent, a Hacker News reader styled like an old newspaper. They grew into bigger worlds, like Shomer Valley Railway, an explorable 3D railway with a life-size Manhattan you can drive, and OneArt, a shared real-time canvas. This site is the latest.',
+      'Through all of it I kept shipping side projects. They started small: a virtual piano, Pac-Man from scratch, a news reader styled like an old newspaper. They grew into bigger worlds, like Concrete Jungle, a 3D open world with a GTA-style Joyride mode through New York City and the Amazon jungle, OneArt, a shared real-time canvas, and Arcadia, a browser arcade. This site is the latest.',
     ],
   },
 ];
@@ -227,28 +227,29 @@ export const jack = {
     ];
   },
   projects: [
-    { name: 'Shomer Valley Railway', blurb: 'An explorable 3D railway world: ride trains, walk the towns, drive a life-size Manhattan.', url: 'https://concretejungle.app' },
-    { name: 'OneArt', blurb: 'One shared real-time canvas; everyone paints, and the final piece goes to the people who made it.', url: '' },
-    { name: 'Arcadia', blurb: 'A modern browser arcade in the spirit of the old Flash game sites.', url: '' },
+    {
+      name: 'Concrete Jungle',
+      blurb: 'A 3D open world you explore right in the browser.',
+      url: 'https://concretejungle.app/',
+      highlights: ['Joyride mode: GTA-style driving through New York City', 'The Amazon jungle and other places to explore', 'Realistic landscapes, all running in the browser'],
+    },
+    { name: 'OneArt', blurb: 'One shared real-time canvas; everyone paints, and the final piece goes to the people who made it.', url: 'https://drawoneart.com/', highlights: [] as string[] },
+    { name: 'Arcadia', blurb: 'A modern browser arcade in the spirit of the old Flash game sites.', url: 'https://playarcadia.net/', highlights: [] as string[] },
   ],
-  /** early, small projects (the "curiosity cabinet") */
+  /** early, small projects */
   smallProjects: [
-    { name: 'Casio-style virtual piano', url: 'https://concretejungle.app/projects/casio-inspired-piano' },
-    { name: 'Pac-Man from scratch', url: 'https://concretejungle.app/projects/pacman-game' },
-    { name: 'Checkers with an AI opponent', url: 'https://concretejungle.app/projects/checkers-game' },
-    { name: 'Hacker News, vintage newspaper edition', url: 'https://concretejungle.app/projects/news-app' },
-    { name: 'AI image generator', url: 'https://concretejungle.app/projects/ai-image-generator' },
-    { name: 'Wordle clone', url: 'https://concretejungle.app/projects/wordle-clone' },
+    { name: 'Piano', blurb: 'A playable virtual piano.', url: 'https://jsho982045.github.io/Piano/' },
+    { name: 'Pac-Man', blurb: 'Pac-Man, built from scratch.', url: 'https://jsho982045.github.io/Pacman/' },
+    { name: 'News App', blurb: 'A news reader styled like an old newspaper.', url: 'https://jsho982045.github.io/NewsApp/' },
   ],
-  allProjectsUrl: 'https://concretejungle.app/projects',
+  allProjectsUrl: 'https://github.com/jsho982045',
 };
 
 /** Every project as one list (for shelves): big ones first, then this site, then the early ones. */
-const SHORT: Record<string, string> = { 'Shomer Valley Railway': 'Shomer Valley', 'Casio-style virtual piano': 'Piano', 'Pac-Man from scratch': 'Pac-Man', 'Checkers with an AI opponent': 'Checkers', 'Hacker News, vintage newspaper edition': 'HN Gazette', 'AI image generator': 'AI Images', 'Wordle clone': 'Wordle' };
 export const shelf: { name: string; label: string; blurb: string; url: string; size: 'big' | 'small' }[] = [
-  ...jack.projects.map((p) => ({ ...p, label: SHORT[p.name] ?? p.name, size: 'big' as const })),
+  ...jack.projects.map((p) => ({ name: p.name, label: p.name, blurb: p.blurb, url: p.url, size: 'big' as const })),
   { name: 'jackshomer.io', label: 'This site', blurb: 'This site: six physical designs, real physics, an AI assistant. See /built for how.', url: '/built', size: 'big' },
-  ...jack.smallProjects.map((p) => ({ name: p.name, label: SHORT[p.name] ?? p.name, blurb: 'One of the early projects from the Concrete Jungle cabinet.', url: p.url, size: 'small' as const })),
+  ...jack.smallProjects.map((p) => ({ name: p.name, label: p.name, blurb: p.blurb, url: p.url, size: 'small' as const })),
 ];
 
 export type Jack = typeof jack;
