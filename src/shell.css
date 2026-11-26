@@ -198,3 +198,15 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .hands-cur.down i { transform: scale(.62); background: #ffcf6a; border-color: #ffcf6a; }
 .hands-cur.shook i { transform: scale(1.5); border-color: #9fd0ff; }
 .hands-cur.lost i { opacity: .25; }
+.hands-glove { position: fixed; inset: 0; width: 100vw; height: 100vh; }
+.hands-cur i { left: -9px; top: -9px; width: 18px; height: 18px; border-width: 2px; }
+.hand-target { outline: 3px solid #ffcf6a !important; outline-offset: 3px; transition: outline-offset .15s; }
+.hand-hint { position: absolute; top: calc(100% + 12px); right: 0; display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 6px; border-radius: 999px;
+  background: #ffcf6a; color: #2a1e08; box-shadow: 0 14px 30px -10px rgba(0,0,0,.55); animation: hh-in .5s cubic-bezier(.2,.9,.3,1.3) both; z-index: 2; }
+.hand-hint::before { content: ''; position: absolute; top: -6px; left: calc(var(--arrow, 50%) - 6px); width: 12px; height: 12px; background: #ffcf6a; transform: rotate(45deg); border-radius: 2px; }
+.hand-hint.out { opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .25s; }
+.dock .hand-hint button { height: 36px; min-width: 0; padding: 0 12px; color: inherit; font-weight: 500; position: relative; }
+.dock .hand-hint .hh-x { padding: 0 10px; font-size: 18px; opacity: .7; }
+.hand-hint .hh-go span { display: inline-block; animation: hh-wave 1.6s ease-in-out infinite; transform-origin: 70% 80%; }
+@keyframes hh-in { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
+@keyframes hh-wave { 0%, 60%, 100% { transform: rotate(0); } 15% { transform: rotate(18deg); } 30% { transform: rotate(-10deg); } 45% { transform: rotate(14deg); } }

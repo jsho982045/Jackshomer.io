@@ -73,12 +73,17 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
   ui.className = 'hands';
   ui.innerHTML = `
     <div class="hands-prev"><video playsinline muted></video><canvas></canvas><span>Pinch to grab · shake to shake</span></div>
+    <canvas class="hands-glove"></canvas>
     <div class="hands-cur"><i></i></div>`;
   document.body.append(ui);
   const video = ui.querySelector('video')!, prev = ui.querySelector<HTMLCanvasElement>('.hands-prev canvas')!, pg = prev.getContext('2d')!;
   const cur = ui.querySelector<HTMLDivElement>('.hands-cur')!;
   if (stream) { video.srcObject = stream; void video.play(); } else ui.querySelector('.hands-prev')!.remove();
   prev.width = 160; prev.height = 120;
+  const glove = ui.querySelector<HTMLCanvasElement>('.hands-glove')!, gg = glove.getContext('2d')!;
+  const fitGlove = () => { const d = Math.min(2, devicePixelRatio); glove.width = innerWidth * d; glove.height = innerHeight * d; gg.setTransform(d, 0, 0, d, 0, 0); };
+  fitGlove(); addEventListener('resize', fitGlove);
+  let lastLm: Pt[] | null = null, grip = 0;
 
   // pointer capture would throw for our synthetic pointer: swallow it while we're on
   const origCap = Element.prototype.setPointerCapture, origRel = Element.prototype.releasePointerCapture;
@@ -95,11 +100,49 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
     const init: PointerEventInit = { bubbles: true, cancelable: true, composed: true, clientX: sx, clientY: sy, screenX: sx, screenY: sy, pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons: pinched ? 1 : 0, view: window, ...extra };
     target.dispatchEvent(type.startsWith('pointer') ? new PointerEvent(type, init) : new MouseEvent(type, init));
   };
+  // ---------- magnetic targets: buttons and links pull the pointer in, so they're easy to hit ----------
+  const CLICKABLE = 'a[href], button, [role="button"], summary, label, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  let snapPress = false, rawDX = 0, rawDY = 0, rawX = 0, rawY = 0;
+  let targets: { el: Element; r: DOMRect }[] = [], targetsAt = 0, snapEl: Element | null = null;
+  function refreshTargets(now: number) {
+    if (now - targetsAt < 150) return; targetsAt = now;
+    targets = [];
+    for (const el of document.querySelectorAll(CLICKABLE)) {
+      if (ui.contains(el)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4 || r.width * r.height > 360 * 140 || r.bottom < 0 || r.top > innerHeight) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.pointerEvents === 'none' || Number(cs.opacity) < 0.3) continue;
+      if ((el as HTMLElement).closest('[hidden]')) continue;
+      targets.push({ el, r });
+    }
+  }
+  function snap(px: number, py: number): [number, number] {
+    let best: { el: Element; r: DOMRect } | null = null, bd = 46;
+    for (const t of targets) {
+      const dx = Math.max(t.r.left - px, 0, px - t.r.right), dy = Math.max(t.r.top - py, 0, py - t.r.bottom);
+      const d = Math.hypot(dx, dy);
+      if (d < bd || (d === 0 && best && t.r.width * t.r.height < best.r.width * best.r.height)) { bd = d; best = t; }
+    }
+    if (best !== null) {
+      const b: { el: Element; r: DOMRect } = best;
+      if (snapEl !== b.el) { snapEl?.classList.remove('hand-target'); b.el.classList.add('hand-target'); snapEl = b.el; }
+      // pull toward the centre: all the way when close, partly at the edge of the field
+      const cx = b.r.left + b.r.width / 2, cy = b.r.top + b.r.height / 2, k = bd === 0 ? 0.65 : 0.45;
+      return [px + (cx - px) * k, py + (cy - py) * k];
+    }
+    snapEl?.classList.remove('hand-target'); snapEl = null;
+    return [px, py];
+  }
   const under = () => { const el = document.elementFromPoint(sx, sy); return el && !ui.contains(el) ? el : null; };
   let hoverEl: Element | null = null;
 
   function press() {
-    pinched = true; downTarget = under(); downAt = performance.now(); downX = sx; downY = sy; moved = 0;
+    pinched = true;
+    // pressing near a button or link presses that button, even if the finger drifted a little
+    if (snapEl) { const r = snapEl.getBoundingClientRect(); sx = r.left + r.width / 2; sy = r.top + r.height / 2; }
+    snapPress = !!snapEl; rawDX = rawX; rawDY = rawY;
+    downTarget = snapEl ?? under(); downAt = performance.now(); downX = sx; downY = sy; moved = 0;
     fire('pointerdown', downTarget); fire('mousedown', downTarget);
     cur.classList.add('down');
   }
@@ -107,7 +150,7 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
     const t = downTarget; pinched = false;
     fire(cancel ? 'pointercancel' : 'pointerup', t, { buttons: 0 }); fire('mouseup', t, { buttons: 0 });
     // a short, still pinch is a click on whatever is under the finger
-    if (!cancel && moved < 18 && performance.now() - downAt < 600) { const el = under(); if (el && (el === t || t?.contains(el) || el.contains(t!))) { fire('click', el, { buttons: 0 }); (el as HTMLElement).focus?.({ preventScroll: true }); } }
+    if (!cancel && moved < 34 && performance.now() - downAt < 750) { const el = t; if (el) { fire('click', el, { buttons: 0 }); (el as HTMLElement).focus?.({ preventScroll: true }); } }
     downTarget = null; cur.classList.remove('down');
   }
 
@@ -124,7 +167,7 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
     if (!lm) {
       // hand left the frame: drop anything held after a moment
       lostFor += dt;
-      if (lostFor > 0.25) { if (pinched) release(true); cur.classList.add('lost'); seen = false; }
+      if (lostFor > 0.25) { if (pinched) release(true); cur.classList.add('lost'); seen = false; lastLm = null; snapEl?.classList.remove('hand-target'); snapEl = null; }
       drawPreview(null); smoothStep(dt); return;
     }
     lostFor = 0; cur.classList.remove('lost');
@@ -134,12 +177,15 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
     const m = 0.14;
     x = Math.min(1, Math.max(0, (px - m) / (1 - 2 * m))) * innerWidth;
     y = Math.min(1, Math.max(0, (py - m) / (1 - 2 * m))) * innerHeight;
+    lastLm = lm; rawX = x; rawY = y;
+    if (!pinched) { refreshTargets(now); [x, y] = snap(x, y); }
     if (!seen) { sx = x; sy = y; seen = true; }
     // pinch with hysteresis, relative to hand size so distance from the camera doesn't matter
     const size = dist(lm[0], lm[9]) || 0.1;
     const ratio = dist(th, ix) / size;
-    if (!pinched && ratio < 0.32) press();
-    else if (pinched && ratio > 0.5) release();
+    grip = Math.max(0, Math.min(1, (0.75 - ratio) / 0.45));
+    if (!pinched && ratio < 0.38) press();
+    else if (pinched && ratio > 0.56) release();
     // open-hand shake: fast back-and-forth while not pinched
     const t = now / 1000;
     const lastH = hist[hist.length - 1];
@@ -161,6 +207,11 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
   };
 
   function smoothStep(dt: number) {
+    // a press on a button holds the pointer on it until the hand clearly moves away
+    if (pinched) {
+      moved = Math.max(moved, Math.hypot(rawX - rawDX, rawY - rawDY));
+      if (snapPress && moved < 34) { x = downX; y = downY; }
+    }
     // follow the hand: snappy when moving fast, steady when nearly still (cuts jitter)
     const d = Math.hypot(x - sx, y - sy);
     const k = 1 - Math.pow(d > 40 ? 0.0005 : d > 8 ? 0.004 : 0.03, dt);
@@ -168,13 +219,52 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
     const mv = Math.hypot(nx - sx, ny - sy);
     sx = nx; sy = ny;
     cur.style.transform = `translate(${sx}px, ${sy}px)`;
+    drawGlove();
     if (!seen || mv < 0.2) return;
-    if (pinched) { moved += Math.hypot(sx - downX, sy - downY) > 18 ? mv : 0; fire('pointermove', downTarget); fire('mousemove', downTarget); }
+    if (pinched) { fire('pointermove', downTarget); fire('mousemove', downTarget); }
     else {
       const el = under();
       if (el !== hoverEl) { fire('pointerout', hoverEl); fire('mouseout', hoverEl); fire('pointerover', el); fire('mouseover', el); hoverEl = el; }
       fire('pointermove', el); fire('mousemove', el);
     }
+  }
+
+  /** the hand itself, drawn around the pointer so you can see it open and close */
+  function drawGlove() {
+    gg.clearRect(0, 0, innerWidth, innerHeight);
+    const lm = lastLm;
+    if (!lm || !seen) return;
+    const mx = 1 - (lm[4].x + lm[8].x) / 2, my = (lm[4].y + lm[8].y) / 2;
+    const size = Math.hypot(lm[0].x - lm[9].x, lm[0].y - lm[9].y) || 0.1;
+    const S = 120 / size; // the palm is ~120px tall on screen whatever your distance from the camera
+    const P = (i: number): [number, number] => [sx + ((1 - lm[i].x) - mx) * S, sy + (lm[i].y - my) * S];
+    const warm = pinched ? 1 : grip * 0.6;
+    const fill = `rgba(${255}, ${Math.round(255 - 48 * warm)}, ${Math.round(255 - 150 * warm)}, ${0.45 + 0.3 * warm})`;
+    const line = `rgba(255, ${Math.round(255 - 48 * warm)}, ${Math.round(255 - 150 * warm)}, 0.92)`;
+    gg.save();
+    gg.globalAlpha = snapEl && !pinched ? 0.5 : 0.88; // see through the hand to what you're about to press
+    gg.shadowColor = 'rgba(0,0,0,.45)'; gg.shadowBlur = 14; gg.shadowOffsetY = 6;
+    // palm
+    gg.beginPath();
+    for (const [k, i] of [0, 1, 5, 9, 13, 17].entries()) { const [px2, py2] = P(i); if (k) gg.lineTo(px2, py2); else gg.moveTo(px2, py2); }
+    gg.closePath(); gg.fillStyle = fill; gg.fill();
+    // fingers: thick rounded strokes that taper to the tip
+    gg.lineCap = 'round'; gg.lineJoin = 'round'; gg.strokeStyle = line;
+    const fingers = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16], [17, 18, 19, 20]];
+    for (const f of fingers) {
+      for (let j = 0; j < f.length - 1; j++) {
+        const [ax, ay] = P(f[j]), [bx, by] = P(f[j + 1]);
+        gg.lineWidth = Math.max(7, (S * size) * (0.2 - j * 0.03));
+        gg.beginPath(); gg.moveTo(ax, ay); gg.lineTo(bx, by); gg.stroke();
+      }
+    }
+    gg.shadowBlur = 0;
+    // knuckle line across the palm
+    gg.lineWidth = 3; gg.strokeStyle = 'rgba(255,255,255,.35)';
+    gg.beginPath(); for (const [k, i] of [5, 9, 13, 17].entries()) { const [px2, py2] = P(i); if (k) gg.lineTo(px2, py2); else gg.moveTo(px2, py2); } gg.stroke();
+    // a spark where thumb meets finger
+    if (pinched) { gg.fillStyle = 'rgba(255, 214, 120, .9)'; gg.beginPath(); gg.arc(sx, sy, 6, 0, 7); gg.fill(); }
+    gg.restore();
   }
 
   function drawPreview(lm: Pt[] | null) {
@@ -198,6 +288,7 @@ function run(stream: MediaStream | null, detect: (v: HTMLVideoElement, t: number
     if (pinched) release(true);
     document.removeEventListener('visibilitychange', onVis);
     Element.prototype.setPointerCapture = origCap; Element.prototype.releasePointerCapture = origRel;
+    removeEventListener('resize', fitGlove); snapEl?.classList.remove('hand-target');
     ui.remove(); cleanup();
   };
 }

@@ -137,6 +137,27 @@ const dock = (() => {
   });
   sheet.querySelector('.hs-no')!.addEventListener('click', () => (sheet.hidden = true));
   sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.hidden = true; });
+  // a one-time nudge on desktop, because nobody expects a website to want their hand
+  try {
+    const seenN = Number(localStorage.getItem('hand-hint') ?? '0');
+    if (seenN < 2 && matchMedia('(pointer: fine)').matches && innerWidth >= 700 && !location.search.includes('handtest')) {
+      setTimeout(() => {
+        if (hands?.handStatus() === 'on' || !sheet.hidden) return;
+        localStorage.setItem('hand-hint', String(seenN + 1));
+        const tip = document.createElement('div');
+        tip.className = 'hand-hint';
+        tip.innerHTML = `<button class="hh-go"><b>New:</b> try this site with your hand <span aria-hidden="true">✋</span></button><button class="hh-x" aria-label="Dismiss">×</button>`;
+        nav.append(tip);
+        const r = handBtn.getBoundingClientRect(), tr = tip.getBoundingClientRect();
+        tip.style.setProperty('--arrow', `${Math.max(16, Math.min(tr.width - 16, r.left + r.width / 2 - tr.left))}px`);
+        const close = (forever: boolean) => { tip.classList.add('out'); setTimeout(() => tip.remove(), 300); if (forever) localStorage.setItem('hand-hint', '9'); };
+        tip.querySelector('.hh-go')!.addEventListener('click', () => { close(true); handBtn.click(); });
+        tip.querySelector('.hh-x')!.addEventListener('click', () => close(true));
+        handBtn.addEventListener('click', () => close(true), { once: true });
+        setTimeout(() => close(false), 12000);
+      }, 2500);
+    }
+  } catch { /* storage blocked: skip the hint */ }
   if (location.search.includes('handtest')) (window as unknown as { __hands: () => Promise<unknown> }).__hands = async () => (hands ??= await import('./lib/hands'))._driveForTest();
 
   const pjBtn = nav.querySelector<HTMLButtonElement>('.dk-pj')!;
