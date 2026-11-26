@@ -27,6 +27,7 @@ export const designs: DesignMeta[] = [
   { id: 'machine', path: '/machine', name: 'Machine', tone: 'dark', blurb: 'The portfolio as a lab instrument. Dial a section, press a key, flip a switch.', load: memo(() => import('./machine/machine')) },
   { id: 'gel', path: '/gel', name: 'Gel', tone: 'light', blurb: 'Every section is a soft-body gummy. Throw them, squash them, tap to open.', load: memo(() => import('./gel/gel')) },
   { id: 'cabin', path: '/cabin', name: 'Cabin', tone: 'dark', heavy: true, blurb: 'A cabin in the woods at dusk. Fire going, rain on the glass, everything on the table is about me.', load: memo(() => import('./cabin/cabin')) },
+  { id: 'globe', path: '/globe', name: 'Snow globe', tone: 'dark', heavy: true, blurb: 'A tiny New York under glass. Spin it, shake it, let the snow settle.', load: memo(() => import('./globe/globe')) },
   { id: 'ask', path: '/ask', name: 'Ask', tone: 'auto', blurb: 'A small assistant that only knows one subject: me.', load: memo(() => import('./ask/ask')) },
 ];
 

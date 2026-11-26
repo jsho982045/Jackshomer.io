@@ -37,7 +37,7 @@ const INTENTS: Intent[] = [
   { id: 'why', keys: { why: 3, cs50: 6, malan: 5, harvard: 4, covid: 4, inspired: 4, inspiration: 4, passion: 3, motivation: 3, vinci: 5, begin: 2, began: 2 }, reply: () => `In his words: “${story.find((c) => c.id === 'curiosity')!.body[0]}”\n\n“${story.find((c) => c.id === 'curiosity')!.body[1]}”` },
   { id: 'linkedin', keys: { linkedin: 6 }, reply: () => `Here's his LinkedIn: [linkedin.com/in/jack-shomer](${jack.linkedin}).` },
   { id: 'github', keys: { github: 4, code: 2, repo: 2, repos: 2, open: 1, source: 1 }, reply: () => `His GitHub is [github.com/${jack.githubHandle}](${jack.github}).` },
-  { id: 'site', keys: { site: 3, website: 3, this: 1, built: 1, how: 1, made: 1 }, reply: () => `This site is six designs of the same portfolio, each one physical in a different way. It's built with Vite and TypeScript, no UI framework, with hand-written physics (cloth, soft bodies, paper) and three.js for the cabin. Each design loads only when you open it.` },
+  { id: 'site', keys: { site: 3, website: 3, this: 1, built: 1, how: 1, made: 1 }, reply: () => `This site is seven designs of the same portfolio, each one physical in a different way. It's built with Vite and TypeScript, no UI framework, with hand-written physics (cloth, soft bodies, paper) and three.js for the cabin. Each design loads only when you open it.` },
 ];
 
 // one intent per job, keyed on the company's name

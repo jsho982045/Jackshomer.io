@@ -61,7 +61,7 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .dk-menu a[aria-current] { background: rgba(127, 127, 127, 0.18); font-weight: 700; }
 .dk-menu i { width: 14px; height: 14px; border-radius: 4px; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
 .sw-linen { --sw: #d9cdb4; } .sw-desk { --sw: #7a4a2c; } .sw-machine { --sw: #c7c6c0; }
-.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-ask { --sw: #d97757; } .sw-story { --sw: #a3321f; } .sw-resume { --sw: #ece7dd; } .sw-built { --sw: #10233f; }
+.sw-gel { --sw: #e2263b; } .sw-cabin { --sw: #c8772e; } .sw-globe { --sw: #9fb6e0; } .sw-ask { --sw: #d97757; } .sw-story { --sw: #a3321f; } .sw-resume { --sw: #ece7dd; } .sw-built { --sw: #10233f; }
 .dk-menu hr { border: 0; border-top: 1px solid var(--dk-line); margin: 4px 6px; width: auto; }
 
 /* ---------- design-to-design transition ---------- */
@@ -101,7 +101,9 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .hub .foot { margin-top: 36px; color: #9d998f; font-size: 14px; }
 .hub .foot a { color: #eeebe4; text-underline-offset: 3px; }
 .hub kbd { font: inherit; padding: 1px 6px; border: 1px solid #555; border-radius: 5px; }
-@media (max-width: 900px) { .hub .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* an odd card out spans the last row instead of sitting alone */
+.hub .grid a.sw:last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+@media (max-width: 900px) { .hub .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hub .grid a.sw:last-child:nth-child(3n+1) { grid-column: auto; } .hub .grid a.sw:last-child:nth-child(2n+1) { grid-column: 1 / -1; } }
 @media (max-width: 560px) { .hub .grid { grid-template-columns: minmax(0, 1fr); } .hub a.sw { min-height: 230px; } }
 
 /* swatch materials (pure CSS, no images) */
@@ -121,6 +123,10 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .m-cabin { background: radial-gradient(ellipse 50% 40% at 30% 60%, rgba(255,150,60,.55), transparent 70%), linear-gradient(#1b2330, #0d1014 60%), #0d1014; }
 .m-cabin::before { content: ''; position: absolute; right: 22px; top: 22px; width: 42%; height: 46%; border: 6px solid #3a2616; background: linear-gradient(#3d4f66, #6f7f8e 60%, #24303a 60%); box-shadow: inset 0 0 20px rgba(0,0,0,.5); }
 .m-cabin::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(60,35,18,.0) 0 22px, rgba(0,0,0,.35) 22px 24px); }
+.m-globe { background: radial-gradient(ellipse 60% 30% at 50% 100%, rgba(255,170,90,.3), transparent 70%), linear-gradient(#0b1222, #1c2540 70%, #2b1d15); }
+.m-globe::before { content: ''; position: absolute; left: 50%; top: 34%; width: 40%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid rgba(255,255,255,.35); box-shadow: inset -12px -10px 30px rgba(255,255,255,.12), inset 10px 8px 20px rgba(255,255,255,.08);
+  background: radial-gradient(1.5px 1.5px at 30% 30%, #fff, transparent), radial-gradient(1.5px 1.5px at 60% 22%, #fff, transparent), radial-gradient(1.5px 1.5px at 72% 48%, #fff, transparent), radial-gradient(1.5px 1.5px at 40% 55%, #fff, transparent), radial-gradient(1.5px 1.5px at 52% 38%, #fff, transparent), linear-gradient(transparent 62%, #eef2f8 62%); }
+.m-globe::after { content: ''; position: absolute; left: 50%; top: calc(34% + 17%); width: 36%; height: 12%; transform: translateX(-50%); background: linear-gradient(#5a3420, #3a2012); border-radius: 4px 4px 10px 10px; }
 .m-ask { background: #f6f1ea; }
 .m-ask::before { content: 'What does Jack do?'; position: absolute; right: 20px; top: 22px; padding: 10px 14px; border-radius: 14px; background: #ebe4d9; color: #2a2522; font-size: 15px; }
 .m-ask::after { content: 'He is a founding engineer at UrbanLogic…'; position: absolute; left: 20px; top: 76px; right: 40px; color: #2a2522; font: 18px/1.4 'Newsreader Variable', Georgia, serif; }

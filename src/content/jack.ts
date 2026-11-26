@@ -248,7 +248,7 @@ export const jack = {
 /** Every project as one list (for shelves): big ones first, then this site, then the early ones. */
 export const shelf: { name: string; label: string; blurb: string; url: string; size: 'big' | 'small' }[] = [
   ...jack.projects.map((p) => ({ name: p.name, label: p.name, blurb: p.blurb, url: p.url, size: 'big' as const })),
-  { name: 'jackshomer.io', label: 'This site', blurb: 'This site: six physical designs, real physics, an AI assistant. See /built for how.', url: '/built', size: 'big' },
+  { name: 'jackshomer.io', label: 'This site', blurb: 'This site: seven physical designs, real physics, an AI assistant. See /built for how.', url: '/built', size: 'big' },
   ...jack.smallProjects.map((p) => ({ name: p.name, label: p.name, blurb: p.blurb, url: p.url, size: 'small' as const })),
 ];
 

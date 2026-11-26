@@ -47,6 +47,7 @@ const TECH: [string, string][] = [
   ['Machine', 'Detented rotary dial (angle snapping with a spring), spring-damped VU needle, and recorded switch and key sounds through the Web Audio API.'],
   ['Gel', 'Position-based soft bodies (edge, bend and area constraints) rendered in WebGL with a refraction shader, so each gummy bends the backdrop behind it.'],
   ['Cabin', 'three.js with physically based materials from CC0 photo scans, filmic tone mapping, a shader fire with a shadow-casting light, rain and lightning, adaptive resolution and depth of field when you focus on something.'],
+  ['Snow globe', 'A three.js scene under a physically based glass sphere (transmission, clearcoat, a custom studio environment for crisp highlights). About 1,600 snowflakes are simulated on the CPU with drag, flutter and swirl that follows the globe as you spin it; they collide with the glass, settle on the ground, and a hard flick or a real phone shake stirs them up again.'],
   ['Ask', 'Streams answers from Gemini (free tier) through a small Node service on Railway with a facts-only system prompt, per-visitor and daily rate limits, and an automatic fallback to an offline engine.'],
   ['Everywhere', 'Physics never runs while the tab is hidden; simulations use a fixed timestep so 60, 90 and 120 Hz screens behave the same; sounds are CC0 recordings, loaded on first interaction.'],
 ];
@@ -55,7 +56,7 @@ const mount: Mount = (root) => {
   root.className = 'design d-built';
   root.innerHTML = `<style>${CSS}</style><div class="wrap">
     <h1>How this site is built</h1>
-    <p class="dek">Six designs, one shell, real physics. The numbers below are read from this exact build, and the load times are measured in your browser right now.</p>
+    <p class="dek">Seven designs, one shell, real physics. The numbers below are read from this exact build, and the load times are measured in your browser right now.</p>
     <div class="cards" id="b-live"></div>
     <h2>What you download</h2>
     <div class="bars" id="b-bars"><p class="note">Loading build stats…</p></div>
@@ -64,7 +65,7 @@ const mount: Mount = (root) => {
     <div class="grid2">${TECH.map(([h, p]) => `<div class="tech"><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
     <h2>How I build with AI agents</h2>
     <ul class="pts">
-      <li><b>I set direction, agents do the legwork.</b> This site was built in a few long sessions with Claude as a coding agent: I wrote the brief (physical, fast, six designs), made the product calls and reviewed every result.</li>
+      <li><b>I set direction, agents do the legwork.</b> This site was built in a few long sessions with Claude as a coding agent: I wrote the brief (physical, fast, one portfolio in many designs), made the product calls and reviewed every result.</li>
       <li><b>Trust is earned, then extended.</b> Agents get clear guardrails (nothing is committed or pushed without my approval) and have to show evidence: screenshots on desktop and phone, test runs, checksums of synced files.</li>
       <li><b>Verify, don't assume.</b> Facts on this site were checked against primary sources, sizes come from the build itself, and every design was exercised in a real browser before shipping.</li>
       <li><b>Fundamentals first.</b> I learned to program before ChatGPT existed, which is what makes it possible to direct agents well and catch them when they're wrong.</li>

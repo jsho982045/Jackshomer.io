@@ -1,0 +1,36 @@
+.d-globe { position: fixed; inset: 0; overflow: hidden; background: #0b1222; color: #f1ece3; font-family: 'Instrument Sans Variable', system-ui, sans-serif; touch-action: none; }
+.d-globe canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
+.d-globe canvas:active { cursor: grabbing; }
+.d-globe.hover canvas { cursor: pointer; }
+.d-globe .labels { position: absolute; inset: 0; pointer-events: none; }
+.d-globe .hs { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 5px 12px 5px 8px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .22); background: rgba(12, 18, 34, .6); color: #f4f1ea; font: 600 13.5px 'Instrument Sans Variable', system-ui, sans-serif;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); cursor: pointer; white-space: nowrap; will-change: transform;
+  opacity: 0; pointer-events: none; transition: opacity .6s; }
+.d-globe .hs::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .18); }
+.d-globe.settled .hs { opacity: .9; pointer-events: auto; }
+.d-globe.settled .hs.back { opacity: .0; pointer-events: none; }
+.d-globe .hs:hover, .d-globe .hs:focus-visible { opacity: 1; background: rgba(24, 32, 56, .85); outline: none; }
+.d-globe.focused .hs { opacity: 0 !important; pointer-events: none !important; }
+.d-globe .panel { position: absolute; right: max(20px, 4vw); top: 50%; transform: translate(16px, -50%); width: min(400px, calc(100vw - 40px)); max-height: 80vh; overflow: auto; padding: 26px 26px 20px; border-radius: 20px;
+  background: rgba(14, 20, 36, .82); border: 1px solid rgba(255, 255, 255, .14); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .7); opacity: 0; pointer-events: none; transition: opacity .35s, transform .45s cubic-bezier(.2, .8, .2, 1); }
+.d-globe .panel.on { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+.d-globe .panel h2 { margin: 0 0 10px; font: 400 30px/1.1 'Fraunces Variable', Georgia, serif; }
+.d-globe .panel p, .d-globe .panel li { color: #d9dce6; font-size: 16px; line-height: 1.5; }
+.d-globe .panel p { margin: 0 0 12px; }
+.d-globe .panel ul { margin: 0 0 14px; padding-left: 18px; }
+.d-globe .panel ul ul { margin: 4px 0 6px; font-size: 14px; }
+.d-globe .panel li { margin-bottom: 6px; }
+.d-globe .panel a { color: #ffd08a; }
+.d-globe .panel button, .d-globe .ctrl button { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .08); color: inherit; font: 600 14px 'Instrument Sans Variable', system-ui, sans-serif; cursor: pointer; }
+.d-globe .ctrl button:hover, .d-globe .panel button:hover { background: rgba(255, 255, 255, .16); }
+.d-globe .hint { position: absolute; left: max(20px, 4vw); bottom: 26px; max-width: 560px; color: #c5c9d6; font-size: 14.5px; line-height: 1.45; pointer-events: none; }
+.d-globe .hint b { color: #fff; }
+.d-globe .ctrl { position: absolute; right: max(20px, 4vw); bottom: 22px; display: flex; gap: 8px; }
+.d-globe.focused .hint, .d-globe.focused .ctrl { opacity: 0; pointer-events: none; }
+@media (max-width: 760px) {
+  .d-globe .panel { top: auto; bottom: 16px; left: 16px; right: 16px; width: auto; max-height: 52vh; transform: translateY(16px); }
+  .d-globe .panel.on { transform: none; }
+  .d-globe .hint { right: 130px; bottom: 22px; font-size: 13px; }
+}

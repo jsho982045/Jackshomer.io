@@ -1,6 +1,6 @@
 # jackshomer.io
 
-Six versions of one portfolio, each one physical in a different way. Switch between them from the dock (top right) or with `[` and `]`.
+Seven versions of one portfolio, each one physical in a different way. Switch between them from the dock (top right) or with `[` and `]`.
 
 | Path | Design | What it is |
 | --- | --- | --- |
@@ -9,6 +9,7 @@ Six versions of one portfolio, each one physical in a different way. Switch betw
 | `/machine` | Machine | Hardware instrument: detented dial, mechanical keys, a cartridge shelf of projects. |
 | `/gel` | Gel | Pressure soft bodies with a refraction shader. Throw and squash them. |
 | `/cabin` | Cabin | three.js log cabin: fire, rain, a bookcase of projects, and an old man who'd rather you left. |
+| `/globe` | Snow globe | A tiny New York under glass (three.js): spin it, shake it, the snow swirls with the water and settles. |
 | `/ask` | Ask | An assistant that only answers questions about Jack (Gemini via `server/ask.ts`, offline fallback built in). |
 
 Pages: `/story`, `/resume` (fast facts + PDF), `/built` (live numbers on how the site is built). Anything else gets the 404 tag.
