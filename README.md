@@ -12,6 +12,8 @@ Seven versions of one portfolio, each one physical in a different way. Switch be
 | `/globe` | Snow globe | A tiny New York under glass (three.js): spin it, shake it, the snow swirls with the water and settles. |
 | `/ask` | Ask | An assistant that only answers questions about Jack (Gemini via `server/ask.ts`, offline fallback built in). |
 
+**✋ Use your hand:** the hand button in the dock turns on webcam hand tracking (`src/lib/hands.ts`, MediaPipe, on-device). Pinch to grab, quick pinch to click, shake an open hand to shake. It dispatches normal pointer events, so every design works with it. Test without a camera: open any page with `?handtest` and call `__hands()` in the console.
+
 Pages: `/story`, `/resume` (fast facts + PDF), `/built` (live numbers on how the site is built). Anything else gets the 404 tag.
 
 ## Run it

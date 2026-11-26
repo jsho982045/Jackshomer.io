@@ -51,7 +51,7 @@ const mount: Mount = (root) => {
   let cellCol = new Uint8Array(0), kind = new Uint8Array(0);
   let topo = 0, dpr = 1;
   let gl: ReturnType<typeof import('./gl').linenGL> | null = null;
-  let iters = 5, t = 0, wind = true, mode: 'pull' | 'cut' = 'pull';
+  let iters = 5, t = 0, wind = true, mode: 'pull' | 'cut' = 'pull', gust = 0;
   let grab = -1, cutting = false, mx = 0, my = 0, lx0 = 0, ly0 = 0, lastTearSound = 0;
   let hoverX = -1, hoverY = -1, hoverV = 0;
 
@@ -128,7 +128,7 @@ const mount: Mount = (root) => {
       if (pin[k]) continue;
       const vx = (px[k] - qx[k]) * damp, vy = (py[k] - qy[k]) * damp, vz = (pz[k] - qz[k]) * damp;
       qx[k] = px[k]; qy[k] = py[k]; qz[k] = pz[k];
-      let wx = 0, wz = 0;
+      let wx = 0, wz = gust * (0.5 + 0.5 * Math.sin(t * 9 + px[k] * 0.03)) * -0.9;
       if (wind) {
         wz = (Math.sin(t * 1.4 + px[k] * 0.012) + Math.sin(t * 0.63 + py[k] * 0.017 + px[k] * 0.004)) * 0.06;
         wx = Math.sin(t * 0.8 + py[k] * 0.02) * 0.012;
@@ -290,7 +290,11 @@ const mount: Mount = (root) => {
   // adaptive quality: fewer constraint passes on slow devices
   const stop = fixed(step, draw, (ms) => { iters = ms > 6 ? 3 : ms > 3.5 ? 4 : 5; });
 
-  return () => { gone = true; stop(); ro.disconnect(); removeEventListener('keydown', onKey); gl?.dispose(); };
+  // shaking your hand at the camera blows a gust through the cloth
+  const onShake = (e: Event) => { gust = Math.min(2.5, gust + 1.2 * ((e as CustomEvent).detail?.power ?? 1)); };
+  addEventListener('hand:shake', onShake);
+  const gustDecay = setInterval(() => (gust *= 0.85), 50);
+  return () => { gone = true; stop(); ro.disconnect(); removeEventListener('keydown', onKey); removeEventListener('hand:shake', onShake); clearInterval(gustDecay); gl?.dispose(); };
 };
 
 export default mount;

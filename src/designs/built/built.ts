@@ -49,6 +49,7 @@ const TECH: [string, string][] = [
   ['Cabin', 'three.js with physically based materials from CC0 photo scans, filmic tone mapping, a shader fire with a shadow-casting light, rain and lightning, adaptive resolution and depth of field when you focus on something.'],
   ['Snow globe', 'A three.js scene under a physically based glass sphere (transmission, clearcoat, a custom studio environment for crisp highlights). About 1,600 snowflakes are simulated on the CPU with drag, flutter and swirl that follows the globe as you spin it; they collide with the glass, settle on the ground, and a hard flick or a real phone shake stirs them up again.'],
   ['Ask', 'Streams answers from Gemini (free tier) through a small Node service on Railway with a facts-only system prompt, per-visitor and daily rate limits, and an automatic fallback to an offline engine.'],
+  ['Use your hand', 'Click the ✋ in the dock: MediaPipe’s hand landmarker runs on the visitor’s own GPU (WebAssembly + WebGL, nothing uploaded) and turns a pinch into ordinary pointer events, so every design works with a real hand without design-specific code. Shaking an open hand fires a shake event that the snow globe, gummies and linen respond to. Loaded only when switched on.'],
   ['Everywhere', 'Physics never runs while the tab is hidden; simulations use a fixed timestep so 60, 90 and 120 Hz screens behave the same; sounds are CC0 recordings, loaded on first interaction.'],
 ];
 

@@ -57,7 +57,7 @@ const mount: Mount = (root) => {
     <canvas aria-label="A snow globe with a tiny New York inside. Drag to spin it, shake it to make it snow."></canvas>
     <div class="labels"></div>
     <aside class="panel" aria-live="polite"><div class="body"></div><button class="close">Back to the globe</button></aside>
-    <div class="hint"><b>Snow globe.</b> Drag to spin it. Shake it, then let the snow settle. Tap a building to visit.</div>
+    <div class="hint"><b>Snow globe.</b> Drag to spin it. Shake it (or shake your hand at the camera with ✋ on), then let the snow settle. Tap a building to visit.</div>
     <div class="ctrl"><button class="shake">Shake it</button></div>`;
   const cv = root.querySelector('canvas')!;
   const labels = root.querySelector<HTMLDivElement>('.labels')!;
@@ -423,6 +423,8 @@ const mount: Mount = (root) => {
     if (m > 12 && now - lastMotion > 350) { lastMotion = now; shake(Math.min(1.3, m / 20)); }
   };
   addEventListener('devicemotion', onMotion);
+  const onHandShake = (e: Event) => shake(Math.min(1.4, (e as CustomEvent).detail?.power ?? 1));
+  addEventListener('hand:shake', onHandShake);
   let askedMotion = false;
   root.querySelector('.shake')!.addEventListener('click', async () => {
     shake();
@@ -499,6 +501,7 @@ const mount: Mount = (root) => {
     ro.disconnect();
     removeEventListener('keydown', onKey);
     removeEventListener('devicemotion', onMotion);
+    removeEventListener('hand:shake', onHandShake);
     document.removeEventListener('visibilitychange', onVis);
     scene.traverse((o) => {
       const m = o as THREE.Mesh;

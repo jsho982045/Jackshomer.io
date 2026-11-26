@@ -80,6 +80,7 @@ const dock = (() => {
   nav.innerHTML = `
     <a class="dk-home" href="/" aria-label="All designs">JS</a>
     <a class="dk-cv" href="/resume" aria-label="Résumé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Résumé</span></a>
+    <button class="dk-hand" aria-pressed="false" aria-label="Use your hand (camera)" title="Use your hand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M11 10.5V4a1.5 1.5 0 0 1 3 0v7"/><path d="M14 10.5V5.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 11.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5-2.7L4.6 14.4a1.6 1.6 0 0 1 2.5-2l.9 1.1"/></svg></button>
     <button class="dk-pj" aria-expanded="false" aria-controls="dk-proj" aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Projects</span></button>
     <a class="dk-step dk-prev" aria-label="Previous design">‹</a>
     <button class="dk-cur" aria-expanded="false" aria-controls="dk-menu"><span class="dk-name">All designs</span></button>
@@ -101,6 +102,43 @@ const dock = (() => {
   const menu = nav.querySelector<HTMLDivElement>('.dk-menu')!;
   const prev = nav.querySelector<HTMLAnchorElement>('.dk-prev')!;
   const next = nav.querySelector<HTMLAnchorElement>('.dk-next')!;
+  // ✋ hand tracking: explained first, camera only after an explicit "Turn on"
+  const handBtn = nav.querySelector<HTMLButtonElement>('.dk-hand')!;
+  let hands: typeof import('./lib/hands') | null = null, handWired = false;
+  const sheet = document.createElement('div');
+  sheet.className = 'hand-sheet'; sheet.hidden = true;
+  sheet.innerHTML = `<div class="hs-card" role="dialog" aria-modal="true" aria-labelledby="hs-t">
+      <h2 id="hs-t">Use your hand</h2>
+      <p>Your webcam finds your hand and turns it into a pointer, so you can grab things with it.</p>
+      <ul><li><b>Move</b> your hand to point.</li><li><b>Pinch</b> thumb and index finger to grab; let go to drop or throw.</li><li><b>Quick pinch</b> to click.</li><li><b>Shake</b> your open hand to shake things (try the snow globe).</li></ul>
+      <p class="hs-small">Tracking runs on your device. No video is recorded or sent anywhere. The first time, it downloads a hand model (about 20 MB). Turn it off any time with the ✋ button.</p>
+      <p class="hs-err" hidden></p>
+      <div class="hs-row"><button class="hs-go">Turn on camera</button><button class="hs-no">Not now</button></div>
+    </div>`;
+  document.body.append(sheet);
+  const sheetErr = sheet.querySelector<HTMLParagraphElement>('.hs-err')!, goBtn = sheet.querySelector<HTMLButtonElement>('.hs-go')!;
+  const reflect = (s: string, msg?: string) => {
+    handBtn.setAttribute('aria-pressed', String(s === 'on'));
+    handBtn.classList.toggle('loading', s === 'loading');
+    goBtn.textContent = s === 'loading' ? 'Loading the hand model…' : 'Turn on camera';
+    goBtn.disabled = s === 'loading';
+    if (s === 'on') sheet.hidden = true;
+    if (s === 'error') { sheet.hidden = false; sheetErr.hidden = false; sheetErr.textContent = msg ?? 'Hand tracking could not start.'; }
+  };
+  handBtn.addEventListener('click', async () => {
+    if (hands?.handStatus() === 'on') { void hands.toggleHands(); return; }
+    sheetErr.hidden = true; sheet.hidden = false; goBtn.focus();
+    hands ??= await import('./lib/hands');
+  });
+  goBtn.addEventListener('click', async () => {
+    if (!hands) { hands = await import('./lib/hands'); }
+    if (!handWired) { handWired = true; hands.onHandStatus(reflect); }
+    if (hands.handStatus() !== 'on') void hands.toggleHands();
+  });
+  sheet.querySelector('.hs-no')!.addEventListener('click', () => (sheet.hidden = true));
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.hidden = true; });
+  if (location.search.includes('handtest')) (window as unknown as { __hands: () => Promise<unknown> }).__hands = async () => (hands ??= await import('./lib/hands'))._driveForTest();
+
   const pjBtn = nav.querySelector<HTMLButtonElement>('.dk-pj')!;
   const proj = nav.querySelector<HTMLDivElement>('.dk-proj')!;
   const setOpen = (o: boolean) => {
@@ -121,7 +159,7 @@ const dock = (() => {
     if (!nav.contains(e.target as Node)) { setOpen(false); setProj(false); }
   });
   addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { setOpen(false); setProj(false); }
+    if (e.key === 'Escape') { setOpen(false); setProj(false); sheet.hidden = true; }
     const t = e.target as HTMLElement;
     if (t.closest('input,textarea,[contenteditable]')) return;
     if (e.key === '[') prev.click();

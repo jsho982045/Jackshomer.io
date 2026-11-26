@@ -222,7 +222,14 @@ const mount: Mount = (root) => {
   ro.observe(cv);
   resize();
   const stop = fixed(step, draw);
-  return () => { gone = true; stop(); ro.disconnect(); removeEventListener('keydown', onKey); gl?.dispose(); };
+  // shaking your hand at the camera tosses every gummy
+  const onShake = (e: Event) => {
+    const p = (e as CustomEvent).detail?.power ?? 1;
+    for (const b of blobs) { const kx = (Math.random() - 0.5) * 30 * p, ky = -(10 + Math.random() * 18) * p; for (let i = 0; i < N; i++) { b.ox[i] = b.x[i] - kx; b.oy[i] = b.y[i] - ky; } }
+    sample(['pluck_001', 'pluck_002'], { gain: 0.3, jitter: 0.3 });
+  };
+  addEventListener('hand:shake', onShake);
+  return () => { gone = true; stop(); ro.disconnect(); removeEventListener('keydown', onKey); removeEventListener('hand:shake', onShake); gl?.dispose(); };
 };
 
 export default mount;

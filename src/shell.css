@@ -168,3 +168,33 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .hub .pj.big:first-child { background: linear-gradient(160deg, #1f2a1d, #1c1c20 60%); }
 @media (max-width: 900px) { .hub .pjs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hub .pj.big:first-child { grid-column: 1 / -1; } }
 @media (max-width: 560px) { .hub .pjs { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- ✋ hand tracking ---------- */
+.dock .dk-hand svg { width: 19px; height: 19px; }
+.dock .dk-hand[aria-pressed='true'] { background: #ffcf6a; color: #2a1e08; }
+.dock .dk-hand.loading svg { animation: hand-wave 0.9s ease-in-out infinite; }
+@keyframes hand-wave { 50% { transform: rotate(-14deg); } }
+@media (max-width: 700px) { .dock .dk-hand { display: none; } }
+.hand-sheet { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgba(8, 8, 12, .55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.hand-sheet[hidden] { display: none; }
+.hand-sheet .hs-card { width: min(440px, 100%); padding: 26px 26px 22px; border-radius: 20px; background: #18171b; color: #f1eee8; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 30px 70px -20px rgba(0,0,0,.8); font-family: 'Instrument Sans Variable', system-ui, sans-serif; }
+.hand-sheet h2 { margin: 0 0 8px; font-size: 24px; }
+.hand-sheet p, .hand-sheet li { color: #cfcac1; font-size: 15px; line-height: 1.5; }
+.hand-sheet p { margin: 0 0 10px; } .hand-sheet ul { margin: 0 0 12px; padding-left: 18px; }
+.hand-sheet .hs-small { font-size: 13px; color: #9d988f; }
+.hand-sheet .hs-err { color: #ff9b84; font-weight: 600; }
+.hand-sheet .hs-row { display: flex; gap: 8px; margin-top: 14px; }
+.hand-sheet button { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: transparent; color: inherit; font: 600 15px 'Instrument Sans Variable', system-ui, sans-serif; cursor: pointer; }
+.hand-sheet .hs-go { background: #ffcf6a; color: #2a1e08; border-color: transparent; }
+.hand-sheet .hs-go:disabled { opacity: .7; cursor: progress; }
+.hands { position: fixed; inset: 0; z-index: 55; pointer-events: none; }
+.hands-prev { position: fixed; left: 16px; top: 16px; width: 160px; height: 120px; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 10px 30px -10px rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.18); }
+.hands-prev video, .hands-prev canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hands-prev video { transform: scaleX(-1); opacity: .55; }
+.hands-prev span { position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 6px; font: 600 10.5px 'Instrument Sans Variable', system-ui, sans-serif; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.7)); text-align: center; }
+.hands-cur { position: fixed; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
+.hands-cur i { position: absolute; left: -17px; top: -17px; width: 34px; height: 34px; border-radius: 50%; border: 2.5px solid #fff; background: rgba(255,255,255,.12);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.4); transition: transform .12s, background .12s, border-color .12s, opacity .2s; }
+.hands-cur.down i { transform: scale(.62); background: #ffcf6a; border-color: #ffcf6a; }
+.hands-cur.shook i { transform: scale(1.5); border-color: #9fd0ff; }
+.hands-cur.lost i { opacity: .25; }
