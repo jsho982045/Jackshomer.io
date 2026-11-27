@@ -201,12 +201,38 @@ html[data-tone='light'] .dock { --dk-bg: rgba(255, 252, 247, 0.7); --dk-ink: #2a
 .hands-glove { position: fixed; inset: 0; width: 100vw; height: 100vh; }
 .hands-cur i { left: -9px; top: -9px; width: 18px; height: 18px; border-width: 2px; }
 .hand-target { outline: 3px solid #ffcf6a !important; outline-offset: 3px; transition: outline-offset .15s; }
-.hand-hint { position: absolute; top: calc(100% + 12px); right: 0; display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 6px; border-radius: 999px;
-  background: #ffcf6a; color: #2a1e08; box-shadow: 0 14px 30px -10px rgba(0,0,0,.55); animation: hh-in .5s cubic-bezier(.2,.9,.3,1.3) both; z-index: 2; }
-.hand-hint::before { content: ''; position: absolute; top: -6px; left: calc(var(--arrow, 50%) - 6px); width: 12px; height: 12px; background: #ffcf6a; transform: rotate(45deg); border-radius: 2px; }
-.hand-hint.out { opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .25s; }
-.dock .hand-hint button { height: 36px; min-width: 0; padding: 0 12px; color: inherit; font-weight: 500; position: relative; }
-.dock .hand-hint .hh-x { padding: 0 10px; font-size: 18px; opacity: .7; }
-.hand-hint .hh-go span { display: inline-block; animation: hh-wave 1.6s ease-in-out infinite; transform-origin: 70% 80%; }
-@keyframes hh-in { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
-@keyframes hh-wave { 0%, 60%, 100% { transform: rotate(0); } 15% { transform: rotate(18deg); } 30% { transform: rotate(-10deg); } 45% { transform: rotate(14deg); } }
+
+/* ---------- dock: Ask ---------- */
+.dock .dk-ask { gap: 6px; padding: 0 12px 0 10px; }
+.dock .dk-ask svg { width: 17px; height: 17px; }
+@media (max-width: 480px) { .dock .dk-ask span { display: none; } .dock .dk-ask { padding: 0 10px; } }
+
+/* ---------- one-time hint bubbles ---------- */
+.hint-bubble { position: absolute; top: calc(100% + 12px); right: 0; width: min(330px, calc(100vw - 24px)); padding: 14px 40px 14px 16px; border-radius: 18px;
+  background: #ffcf6a; color: #2a1e08; box-shadow: 0 18px 40px -12px rgba(0,0,0,.55); animation: hb-in .5s cubic-bezier(.2,.9,.3,1.25) both; z-index: 3; text-align: left; }
+.hint-bubble::before { content: ''; position: absolute; top: -6px; left: calc(var(--arrow, 50%) - 7px); width: 14px; height: 14px; background: #ffcf6a; transform: rotate(45deg); border-radius: 3px; }
+.hint-bubble.out { opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .25s; }
+.hint-bubble p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.4; }
+.hint-bubble .hb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dock .hint-bubble button { height: auto; min-height: 36px; padding: 6px 12px; border-radius: 999px; font: 600 13.5px 'Instrument Sans Variable', system-ui, sans-serif; white-space: normal; }
+.dock .hint-bubble .hb-q, .dock .hint-bubble .hb-go { background: #2a1e08; color: #ffe6ad; }
+.dock .hint-bubble .hb-q:hover, .dock .hint-bubble .hb-go:hover { background: #3d2c0c; }
+.dock .hint-bubble .hb-x { position: absolute; top: 6px; right: 6px; min-height: 30px; width: 30px; padding: 0; background: transparent; color: #2a1e08; font-size: 18px; opacity: .65; }
+@keyframes hb-in { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
+
+/* ---------- home: "Try this" strip ---------- */
+.hub .try { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
+.hub .try-card { position: relative; padding: 20px 22px; border-radius: 20px; border: 1px solid #2f2d33; background: linear-gradient(150deg, #24222a, #18171b 70%); color: #eeebe4; }
+.hub .try-ask { background: linear-gradient(150deg, #2b2520, #18171b 70%); }
+.hub .try-hand { background: linear-gradient(150deg, #1f2730, #18171b 70%); }
+.hub .try-k { display: inline-block; margin-bottom: 8px; padding: 3px 9px; border-radius: 999px; background: #ffcf6a; color: #2a1e08; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.hub .try-card h2 { margin: 0 0 6px; font-size: 22px; }
+.hub .try-card p { margin: 0 0 14px; color: #bdb8ae; font-size: 15px; line-height: 1.45; }
+.hub .try-q { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hub .try-q a, .hub .try-go { min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 999px; border: 1px solid #45424a; background: #2a282e; color: #f3efe7; font: 600 14px 'Instrument Sans Variable', system-ui, sans-serif; text-decoration: none; cursor: pointer; }
+.hub .try-q a:hover, .hub .try-go:hover { background: #36333b; border-color: #5a5660; }
+.hub .try-go { background: #ffcf6a; color: #2a1e08; border-color: transparent; }
+.hub .try-go:hover { background: #ffd987; }
+.hub .try-phone { display: none; color: #9d988f; font-size: 13.5px; }
+@media (max-width: 700px), (pointer: coarse) { .hub .try-go { display: none; } .hub .try-phone { display: inline; } }
+@media (max-width: 700px) { .hub .try { grid-template-columns: minmax(0, 1fr); } }

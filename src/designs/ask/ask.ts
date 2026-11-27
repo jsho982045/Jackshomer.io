@@ -194,6 +194,11 @@ const mount: Mount = (root) => {
     }
   });
 
+  // a question tapped elsewhere (the hint bubble or the home page) gets asked straight away
+  let pending: string | null = null;
+  try { pending = sessionStorage.getItem('ask-q'); sessionStorage.removeItem('ask-q'); } catch { /* ignore */ }
+  if (pending) { setTimeout(() => ask(pending!), 350); }
+  else
   // focus the composer on desktop only (on phones it would pop the keyboard)
   if (matchMedia('(pointer: fine)').matches) ta.focus({ preventScroll: true });
   return () => streaming?.cancel();

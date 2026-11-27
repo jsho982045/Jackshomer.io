@@ -5,6 +5,7 @@ import { designs, pages, notFound, byPath, type DesignMeta } from './designs/reg
 import { mountHub } from './hub';
 import { jack } from './content/jack';
 import { initAnalytics, track } from './lib/track';
+import { initHints } from './lib/hints';
 
 const stage = document.getElementById('stage')!;
 const root = document.documentElement;
@@ -81,6 +82,7 @@ const dock = (() => {
   nav.innerHTML = `
     <a class="dk-home" href="/" aria-label="All designs">JS</a>
     <a class="dk-cv" href="/resume" aria-label="Résumé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Résumé</span></a>
+    <a class="dk-ask" href="/ask" aria-label="Ask my AI assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12.5 11h.01M16 11h.01"/></svg><span>Ask</span></a>
     <button class="dk-hand" aria-pressed="false" aria-label="Use your hand (camera)" title="Use your hand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M11 10.5V4a1.5 1.5 0 0 1 3 0v7"/><path d="M14 10.5V5.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 11.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.5a6 6 0 0 1-5-2.7L4.6 14.4a1.6 1.6 0 0 1 2.5-2l.9 1.1"/></svg></button>
     <button class="dk-pj" aria-expanded="false" aria-controls="dk-proj" aria-label="Projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Projects</span></button>
     <a class="dk-step dk-prev" aria-label="Previous design">‹</a>
@@ -139,27 +141,7 @@ const dock = (() => {
   });
   sheet.querySelector('.hs-no')!.addEventListener('click', () => (sheet.hidden = true));
   sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.hidden = true; });
-  // a one-time nudge on desktop, because nobody expects a website to want their hand
-  try {
-    const seenN = Number(localStorage.getItem('hand-hint') ?? '0');
-    if (seenN < 2 && matchMedia('(pointer: fine)').matches && innerWidth >= 700 && !location.search.includes('handtest')) {
-      setTimeout(() => {
-        if (hands?.handStatus() === 'on' || !sheet.hidden) return;
-        localStorage.setItem('hand-hint', String(seenN + 1));
-        const tip = document.createElement('div');
-        tip.className = 'hand-hint';
-        tip.innerHTML = `<button class="hh-go"><b>New:</b> try this site with your hand <span aria-hidden="true">✋</span></button><button class="hh-x" aria-label="Dismiss">×</button>`;
-        nav.append(tip);
-        const r = handBtn.getBoundingClientRect(), tr = tip.getBoundingClientRect();
-        tip.style.setProperty('--arrow', `${Math.max(16, Math.min(tr.width - 16, r.left + r.width / 2 - tr.left))}px`);
-        const close = (forever: boolean) => { tip.classList.add('out'); setTimeout(() => tip.remove(), 300); if (forever) localStorage.setItem('hand-hint', '9'); };
-        tip.querySelector('.hh-go')!.addEventListener('click', () => { close(true); handBtn.click(); });
-        tip.querySelector('.hh-x')!.addEventListener('click', () => close(true));
-        handBtn.addEventListener('click', () => close(true), { once: true });
-        setTimeout(() => close(false), 12000);
-      }, 2500);
-    }
-  } catch { /* storage blocked: skip the hint */ }
+  initHints({ nav, askBtn: nav.querySelector<HTMLElement>('.dk-ask')!, handBtn, handOn: () => hands?.handStatus() === 'on', sheetOpen: () => !sheet.hidden, go: navigate });
   initAnalytics();
   if (location.search.includes('handtest')) (window as unknown as { __hands: () => Promise<unknown> }).__hands = async () => (hands ??= await import('./lib/hands'))._driveForTest();
 

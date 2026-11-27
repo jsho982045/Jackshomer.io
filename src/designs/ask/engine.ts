@@ -82,9 +82,16 @@ function near(a: string, b: string) {
   return edits + (a.length - i) + (b.length - j) <= 1;
 }
 
+// common questions whose words are mostly stop-words ("what does Jack do?")
+const PHRASES: [RegExp, string][] = [
+  [/\bwhat (does|do|is) (jack|he|jack shomer)( currently| even)? do\b|\bwhat do you do\b|\bwhat('s| is) (his|jack'?s) (job|deal)\b/, 'who'],
+  [/\b(get|got|getting|break|broke|breaking) into (tech|software|coding|programming|engineering|cs|computer)|\bhow did (he|jack) (start|begin|get started)/, 'story'],
+];
+
 export function answer(q: string): string {
-  const words = norm(q);
   const raw = q.toLowerCase();
+  for (const [re, id] of PHRASES) if (re.test(raw)) return INTENTS.find((it) => it.id === id)!.reply();
+  const words = norm(q);
   const scored = INTENTS.map((it) => {
     let s = 0;
     for (const w of words) {
