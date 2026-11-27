@@ -1,3 +1,4 @@
+import { track } from '../../lib/track';
 import '@fontsource-variable/newsreader';
 import './ask.css';
 import { answer, SUGGESTIONS } from './engine';
@@ -136,6 +137,7 @@ const mount: Mount = (root) => {
 
     const txt = b.querySelector<HTMLDivElement>('.txt')!;
     history.push({ role: 'user', content: q });
+    track('ask-question'); // counted only; the question itself is never sent to analytics
     let full = '';
     let raf = 0;
     const paint = () => { raf = 0; const stick = atBottom(); txt.innerHTML = md(full); if (stick) toBottom(); };

@@ -14,6 +14,8 @@ Seven versions of one portfolio, each one physical in a different way. Switch be
 
 **✋ Use your hand:** the hand button in the dock turns on webcam hand tracking (`src/lib/hands.ts`, MediaPipe, on-device). Pinch to grab, quick pinch to click, shake an open hand to shake. It dispatches normal pointer events, so every design works with it. Test without a camera: open any page with `?handtest` and call `__hands()` in the console.
 
+**Analytics:** Umami Cloud (free, cookieless). Set `VITE_UMAMI_WEBSITE_ID` on the Railway web service; nothing loads without it, and only jackshomer.io is counted. Custom events: résumé downloads, project/email/LinkedIn/GitHub clicks, Ask questions (count only), hand mode on.
+
 Pages: `/story`, `/resume` (fast facts + PDF), `/built` (live numbers on how the site is built). Anything else gets the 404 tag.
 
 ## Run it

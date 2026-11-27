@@ -4,6 +4,7 @@ import './shell.css';
 import { designs, pages, notFound, byPath, type DesignMeta } from './designs/registry';
 import { mountHub } from './hub';
 import { jack } from './content/jack';
+import { initAnalytics, track } from './lib/track';
 
 const stage = document.getElementById('stage')!;
 const root = document.documentElement;
@@ -122,7 +123,8 @@ const dock = (() => {
     handBtn.classList.toggle('loading', s === 'loading');
     goBtn.textContent = s === 'loading' ? 'Loading the hand model…' : 'Turn on camera';
     goBtn.disabled = s === 'loading';
-    if (s === 'on') sheet.hidden = true;
+    if (s === 'on') { sheet.hidden = true; track('hand-mode-on'); }
+    if (s === 'error') track('hand-mode-error');
     if (s === 'error') { sheet.hidden = false; sheetErr.hidden = false; sheetErr.textContent = msg ?? 'Hand tracking could not start.'; }
   };
   handBtn.addEventListener('click', async () => {
@@ -158,6 +160,7 @@ const dock = (() => {
       }, 2500);
     }
   } catch { /* storage blocked: skip the hint */ }
+  initAnalytics();
   if (location.search.includes('handtest')) (window as unknown as { __hands: () => Promise<unknown> }).__hands = async () => (hands ??= await import('./lib/hands'))._driveForTest();
 
   const pjBtn = nav.querySelector<HTMLButtonElement>('.dk-pj')!;
